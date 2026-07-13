@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Qurious - 실시간 라이브 퀴즈 아레나</title>
+  
+  <!-- Inter Font from Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Custom Stylesheets -->
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+  <!-- Ambient background glow effects -->
+  <div class="glow-bg">
+    <div class="glow-circle glow-violet"></div>
+    <div class="glow-circle glow-indigo"></div>
+  </div>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="logo">
+        <i data-lucide="zap" class="logo-icon"></i>
+        <h1>Qurious <span class="badge">Live</span></h1>
+      </div>
+      <nav class="nav-tabs">
+        <button id="tab-student" class="nav-tab active">
+          <i data-lucide="user"></i> 학생 퀴즈 참가
+        </button>
+        <button id="tab-admin" class="nav-tab">
+          <i data-lucide="shield-check"></i> 관리자 대시보드
+        </button>
+      </nav>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="app-main">
+      
+      <!-- ================= STUDENT: JOIN VIEW ================= -->
+      <section id="view-join" class="card view-section active">
+        <div class="welcome-hero">
+          <div class="hero-icon-container">
+            <i data-lucide="sparkles" class="hero-icon"></i>
+          </div>
+          <h2>실시간 퀴즈 참가</h2>
+          <p>닉네임을 만들고 아레나에 입장하여 출제된 퀴즈를 풀어보세요!</p>
+        </div>
+        
+        <form id="join-form" class="join-form">
+          <div class="input-group">
+            <label for="student-nickname">사용할 닉네임</label>
+            <div class="input-with-icon">
+              <i data-lucide="smile"></i>
+              <input type="text" id="student-nickname" placeholder="멋진 닉네임을 입력하세요 (예: 퀴즈천재)" required maxlength="15">
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">
+            입장하기 <i data-lucide="arrow-right"></i>
+          </button>
+        </form>
+      </section>
+
+      <!-- ================= STUDENT: QUIZ VIEW ================= -->
+      <section id="view-quiz" class="view-section">
+        <div class="quiz-info-bar card">
+          <div class="student-profile">
+            <i data-lucide="user" class="profile-icon"></i>
+            <div>
+              <span class="label">참가자</span>
+              <span id="display-nickname" class="value">-</span>
+            </div>
+          </div>
+          <div class="quiz-progress-container">
+            <div class="progress-labels">
+              <span>남은 문제</span>
+              <span id="progress-text">0 / 0</span>
+            </div>
+            <div class="progress-bar-track">
+              <div id="progress-bar-fill" class="progress-bar-fill" style="width: 0%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Questions List Container -->
+        <form id="quiz-form">
+          <div id="questions-container" class="questions-list">
+            <!-- Dynamic Questions Rendered via JS -->
+          </div>
+          
+          <div class="quiz-actions">
+            <button type="submit" class="btn btn-emerald btn-lg btn-block">
+              답안 제출하기 <i data-lucide="send"></i>
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- ================= STUDENT: SCORE VIEW ================= -->
+      <section id="view-score" class="view-section">
+        <div class="score-summary-card card">
+          <div class="confetti-icon">
+            <i data-lucide="trophy"></i>
+          </div>
+          <h2>퀴즈 제출 완료!</h2>
+          <p class="subtitle">수고하셨습니다. 제출된 답안이 채점되었습니다.</p>
+          
+          <div class="score-badge-container">
+            <div class="score-circle">
+              <span id="score-percentage">0</span>
+              <span class="score-label">점</span>
+            </div>
+            <div class="score-details">
+              <div class="detail-item">
+                <span class="detail-label">맞힌 문제</span>
+                <span id="score-correct-count" class="detail-value text-emerald">0 / 0</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">제출 시간</span>
+                <span id="score-submit-time" class="detail-value">-</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Leaderboard Card -->
+        <div class="card leaderboard-card">
+          <div class="card-header">
+            <h3><i data-lucide="award" class="text-gold"></i> 실시간 석차 (리더보드)</h3>
+            <span class="pulse-indicator">실시간 업데이트 중</span>
+          </div>
+          <div class="leaderboard-table-wrapper">
+            <table class="leaderboard-table">
+              <thead>
+                <tr>
+                  <th>순위</th>
+                  <th>닉네임</th>
+                  <th>맞힌 개수</th>
+                  <th>점수</th>
+                  <th>제출 시간</th>
+                </tr>
+              </thead>
+              <tbody id="student-leaderboard-body">
+                <!-- Dynamic Results Rendered via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= ADMIN: DASHBOARD VIEW ================= -->
+      <section id="view-admin" class="view-section admin-grid">
+        
+        <!-- Left: Question Creator & Manager -->
+        <div class="card admin-column">
+          <div class="card-header">
+            <h3><i data-lucide="file-edit" class="text-indigo"></i> 시험 문제 출제 & 편집</h3>
+            <button id="btn-new-question" class="btn btn-secondary btn-sm">
+              <i data-lucide="plus"></i> 새 문제 추가
+            </button>
+          </div>
+
+          <!-- Question Edit Form -->
+          <div id="question-form-container" class="question-edit-form hidden">
+            <h4 id="question-form-title">새 문제 추가</h4>
+            <form id="question-editor-form">
+              <input type="hidden" id="edit-question-id">
+              
+              <div class="input-group">
+                <label for="q-text">질문 내용</label>
+                <textarea id="q-text" rows="3" placeholder="질문을 입력하세요" required></textarea>
+              </div>
+
+              <div class="input-group">
+                <label for="q-type">문제 유형</label>
+                <select id="q-type" required>
+                  <option value="multiple-choice">객관식 (선택형)</option>
+                  <option value="short-answer">주관식 (단답형)</option>
+                </select>
+              </div>
+
+              <!-- Options Container (Only for multiple choice) -->
+              <div id="mcq-options-container" class="options-edit-block">
+                <label>보기 설정 (4지선다)</label>
+                <div class="option-input-row">
+                  <span class="opt-num">1</span>
+                  <input type="text" id="opt-0" placeholder="보기 1" required>
+                </div>
+                <div class="option-input-row">
+                  <span class="opt-num">2</span>
+                  <input type="text" id="opt-1" placeholder="보기 2" required>
+                </div>
+                <div class="option-input-row">
+                  <span class="opt-num">3</span>
+                  <input type="text" id="opt-2" placeholder="보기 3" required>
+                </div>
+                <div class="option-input-row">
+                  <span class="opt-num">4</span>
+                  <input type="text" id="opt-3" placeholder="보기 4" required>
+                </div>
+              </div>
+
+              <div class="input-group">
+                <label for="q-correct">정답</label>
+                <input type="text" id="q-correct" placeholder="정답을 입력하세요 (객관식은 보기 텍스트와 완벽히 일치해야 함)" required>
+              </div>
+
+              <div class="form-buttons">
+                <button type="button" id="btn-cancel-edit" class="btn btn-secondary">취소</button>
+                <button type="submit" class="btn btn-primary">저장하기</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Existing Questions List -->
+          <div class="questions-manager-list">
+            <h4>등록된 문제 목록 (<span id="admin-questions-count">0</span>)</h4>
+            <div id="admin-questions-list" class="admin-questions-scroll">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Live Submission Tracker & Scoreboard -->
+        <div class="card admin-column">
+          <div class="card-header">
+            <h3><i data-lucide="bar-chart-2" class="text-emerald"></i> 실시간 응시 결과 & 통계</h3>
+            <div class="admin-actions">
+              <button id="btn-reset-quiz" class="btn btn-danger btn-sm">
+                <i data-lucide="refresh-cw"></i> 전체 응시결과 초기화
+              </button>
+            </div>
+          </div>
+
+          <div class="admin-stats-summary">
+            <div class="stat-box">
+              <span id="stat-total-players" class="stat-num">0</span>
+              <span class="stat-label">참가자 수</span>
+            </div>
+            <div class="stat-box">
+              <span id="stat-avg-score" class="stat-num">0%</span>
+              <span class="stat-label">평균 점수</span>
+            </div>
+          </div>
+
+          <div class="live-leaderboard-section">
+            <h4>실시간 응시 현황 및 랭킹</h4>
+            <div class="leaderboard-table-wrapper">
+              <table class="leaderboard-table">
+                <thead>
+                  <tr>
+                    <th>순위</th>
+                    <th>닉네임</th>
+                    <th>상태</th>
+                    <th>점수 (정답수)</th>
+                    <th>제출 시간</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-leaderboard-body">
+                  <!-- Rendered via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </section>
+    </main>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
