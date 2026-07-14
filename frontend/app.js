@@ -1,4 +1,241 @@
 // ==========================================================================
+// TRANSLATIONS DICTIONARY
+// ==========================================================================
+const translations = {
+  ko: {
+    logo_sub: "Live",
+    join_title: "실시간 퀴즈 참가",
+    join_desc: "닉네임을 만들고 아레나에 입장하여 출제된 퀴즈를 풀어보세요!",
+    nickname_label: "사용할 닉네임",
+    nickname_placeholder: "멋진 닉네임을 입력하세요 (예: 퀴즈천재)",
+    join_btn: "입장하기",
+    quiz_profile_label: "참가자",
+    quiz_progress_label: "남은 문제",
+    quiz_submit_btn: "답안 제출하기",
+    score_title: "퀴즈 제출 완료!",
+    score_desc: "수고하셨습니다. 제출된 답안이 채점되었습니다.",
+    score_label: "점",
+    score_correct_label: "맞힌 문제",
+    score_time_label: "제출 시간",
+    leaderboard_title: "실시간 석차 (리더보드)",
+    leaderboard_pulse: "실시간 업데이트 중",
+    rank_col: "순위",
+    nickname_col: "닉네임",
+    correct_col: "맞힌 개수",
+    score_col: "점수",
+    time_col: "제출 시간",
+    state_col: "상태",
+    state_completed: "완료",
+    
+    // Admin Dashboard
+    admin_title: "시험 문제 출제 & 편집",
+    admin_new_btn: "새 문제 추가",
+    admin_form_new: "새 문제 추가",
+    admin_form_edit: "문제 편집",
+    q_text_label: "질문 내용",
+    q_text_placeholder: "질문을 입력하세요",
+    q_type_label: "문제 유형",
+    q_type_mcq: "객관식 (선택형)",
+    q_type_sa: "주관식 (단답형)",
+    q_type_mcq_short: "객관식",
+    q_type_sa_short: "주관식",
+    q_image_label: "문제 이미지 (선택사항)",
+    q_image_preview_alt: "이미지 미리보기",
+    q_options_label: "보기 설정 (4지선다)",
+    q_correct_label: "정답",
+    q_correct_placeholder: "정답을 입력하세요 (객관식은 보기 텍스트와 완벽히 일치해야 함)",
+    btn_cancel: "취소",
+    btn_save: "저장하기",
+    admin_list_title: "등록된 문제 목록",
+    q_preview_correct: "정답",
+    admin_stats_title: "실시간 응시 결과 & 통계",
+    admin_reset_btn: "전체 응시결과 초기화",
+    stat_players_label: "참가자 수",
+    stat_avg_label: "평균 점수",
+    live_status_title: "실시간 응시 현황 및 랭킹",
+    qr_access_title: "모바일 간편 접속",
+    qr_access_desc: "같은 와이파이에 연결된 스마트폰 카메라로 스캔하여 즉시 입장할 수 있습니다.",
+    
+    // Dynamic Previews
+    q_preview_empty_title: "등록된 문제가 없습니다.",
+    q_preview_empty_desc: "관리자가 문제를 출제할 때까지 기다려 주세요.",
+    admin_list_empty: "등록된 문제가 없습니다. '새 문제 추가'를 클릭해 퀴즈를 만드세요.",
+    leaderboard_empty: "아직 퀴즈를 완료한 응시자가 없습니다.",
+    
+    // Alerts/Prompts
+    alert_join_empty: "닉네임을 입력해 주세요.",
+    alert_join_fail: "입장에 실패했습니다.",
+    alert_server_error: "서버 연결에 실패했습니다. 서버가 실행 중인지 확인하세요.",
+    alert_profile_missing: "참가자 정보가 없습니다. 다시 로그인해 주세요.",
+    alert_unanswered: "아직 풀지 않은 문제가 {count}개 있습니다. 이대로 제출할까요?",
+    alert_submit_fail: "제출에 실패했습니다.",
+    alert_submit_error: "서버 제출 도중 오류가 발생했습니다.",
+    alert_mcq_options_empty: "객관식 보기 4개를 모두 채워주세요.",
+    alert_question_save_error: "문제를 저장하는 도중 오류가 발생했습니다.",
+    alert_question_delete_confirm: "정말로 이 문제를 삭제하시겠습니까?",
+    alert_question_delete_fail: "문제 삭제에 실패했습니다.",
+    alert_reset_confirm: "경고: 모든 참가자의 기록과 채점 점수가 초기화됩니다. 계속하시겠습니까?",
+    alert_reset_success: "모든 응시 결과가 성공적으로 초기화되었습니다.",
+    alert_reset_fail: "초기화에 실패했습니다.",
+    alert_image_size: "이미지 용량이 너무 큽니다 (최대 2MB). 더 작은 이미지를 사용해 주세요."
+  },
+  vi: {
+    logo_sub: "Trực tiếp",
+    join_title: "Tham gia thi trực tiếp",
+    join_desc: "Tạo biệt danh của bạn và tham gia đấu trường để giải quyết các câu đố!",
+    nickname_label: "Biệt danh của bạn",
+    nickname_placeholder: "Nhập một biệt danh thú vị (Ví dụ: Thiên tài đố vui)",
+    join_btn: "Vào phòng thi",
+    quiz_profile_label: "Thí sinh",
+    quiz_progress_label: "Câu hỏi còn lại",
+    quiz_submit_btn: "Nộp bài làm",
+    score_title: "Đã nộp bài thành công!",
+    score_desc: "Cảm ơn bạn. Bài làm của bạn đã được chấm điểm.",
+    score_label: "Điểm",
+    score_correct_label: "Câu đúng",
+    score_time_label: "Thời gian nộp",
+    leaderboard_title: "Bảng xếp hạng trực tiếp",
+    leaderboard_pulse: "Đang cập nhật trực tiếp",
+    rank_col: "Hạng",
+    nickname_col: "Biệt danh",
+    correct_col: "Số câu đúng",
+    score_col: "Điểm số",
+    time_col: "Thời gian nộp",
+    state_col: "Trạng thái",
+    state_completed: "Đã xong",
+    
+    // Admin Dashboard
+    admin_title: "Tạo & Chỉnh sửa Câu hỏi",
+    admin_new_btn: "Thêm câu hỏi mới",
+    admin_form_new: "Thêm câu hỏi mới",
+    admin_form_edit: "Chỉnh sửa câu hỏi",
+    q_text_label: "Nội dung câu hỏi",
+    q_text_placeholder: "Nhập câu hỏi của bạn",
+    q_type_label: "Loại câu hỏi",
+    q_type_mcq: "Trắc nghiệm (4 lựa chọn)",
+    q_type_sa: "Tự luận (Trả lời ngắn)",
+    q_type_mcq_short: "Trắc nghiệm",
+    q_type_sa_short: "Tự luận",
+    q_image_label: "Hình ảnh câu hỏi (Tùy chọn)",
+    q_image_preview_alt: "Xem trước hình ảnh",
+    q_options_label: "Cấu hình lựa chọn (Trắc nghiệm)",
+    q_correct_label: "Đáp án đúng",
+    q_correct_placeholder: "Nhập đáp án đúng (Với trắc nghiệm phải khớp chính xác với văn bản lựa chọn)",
+    btn_cancel: "Hủy bỏ",
+    btn_save: "Lưu lại",
+    admin_list_title: "Danh sách câu hỏi đã đăng ký",
+    q_preview_correct: "Đáp án",
+    admin_stats_title: "Kết quả & Thống kê trực tiếp",
+    admin_reset_btn: "Đặt lại toàn bộ kết quả",
+    stat_players_label: "Số thí sinh",
+    stat_avg_label: "Điểm trung bình",
+    live_status_title: "Tình trạng thi & Xếp hạng",
+    qr_access_title: "Kết nối nhanh di động",
+    qr_access_desc: "Quét bằng camera điện thoại kết nối cùng mạng Wifi để vào thi ngay lập tức.",
+    
+    // Dynamic Previews
+    q_preview_empty_title: "Không có câu hỏi nào.",
+    q_preview_empty_desc: "Vui lòng đợi quản trị viên tạo câu hỏi.",
+    admin_list_empty: "Không có câu hỏi nào. Nhấp 'Thêm câu hỏi mới' để bắt đầu.",
+    leaderboard_empty: "Chưa có thí sinh nào hoàn thành bài thi.",
+    
+    // Alerts/Prompts
+    alert_join_empty: "Vui lòng nhập biệt danh của bạn.",
+    alert_join_fail: "Không thể tham gia phòng thi.",
+    alert_server_error: "Không thể kết nối máy chủ. Vui lòng kiểm tra xem máy chủ có đang chạy không.",
+    alert_profile_missing: "Thông tin thí sinh bị thiếu. Vui lòng đăng nhập lại.",
+    alert_unanswered: "Bạn còn {count} câu hỏi chưa trả lời. Bạn vẫn muốn nộp bài chứ?",
+    alert_submit_fail: "Nộp bài thất bại.",
+    alert_submit_error: "Đã xảy ra lỗi khi nộp bài lên máy chủ.",
+    alert_mcq_options_empty: "Vui lòng điền đầy đủ cả 4 lựa chọn trắc nghiệm.",
+    alert_question_save_error: "Đã xảy ra lỗi khi lưu câu hỏi.",
+    alert_question_delete_confirm: "Bạn có chắc chắn muốn xóa câu hỏi này không?",
+    alert_question_delete_fail: "Xóa câu hỏi thất bại.",
+    alert_reset_confirm: "CẢNH BÁO: Tất cả kết quả thi của thí sinh sẽ bị xóa sạch. Bạn có muốn tiếp tục?",
+    alert_reset_success: "Đã đặt lại toàn bộ kết quả thi thành công.",
+    alert_reset_fail: "Đặt lại thất bại.",
+    alert_image_size: "Dung lượng ảnh quá lớn (Tối đa 2MB). Vui lòng chọn ảnh nhỏ hơn."
+  },
+  en: {
+    logo_sub: "Live",
+    join_title: "Join Live Quiz",
+    join_desc: "Create a nickname and enter the arena to solve the quiz!",
+    nickname_label: "Nickname to Use",
+    nickname_placeholder: "Enter an awesome nickname (e.g. QuizGenius)",
+    join_btn: "Join Arena",
+    quiz_profile_label: "Participant",
+    quiz_progress_label: "Remaining",
+    quiz_submit_btn: "Submit Answers",
+    score_title: "Quiz Submitted!",
+    score_desc: "Thank you. Your answers have been graded.",
+    score_label: "pts",
+    score_correct_label: "Correct Questions",
+    score_time_label: "Submission Time",
+    leaderboard_title: "Live Leaderboard",
+    leaderboard_pulse: "Updating Live",
+    rank_col: "Rank",
+    nickname_col: "Nickname",
+    correct_col: "Correct",
+    score_col: "Score",
+    time_col: "Submitted At",
+    state_col: "Status",
+    state_completed: "Completed",
+    
+    // Admin Dashboard
+    admin_title: "Create & Edit Questions",
+    admin_new_btn: "Add New Question",
+    admin_form_new: "Add New Question",
+    admin_form_edit: "Edit Question",
+    q_text_label: "Question Text",
+    q_text_placeholder: "Enter the question",
+    q_type_label: "Question Type",
+    q_type_mcq: "Multiple Choice",
+    q_type_sa: "Short Answer",
+    q_type_mcq_short: "MCQ",
+    q_type_sa_short: "Short Answer",
+    q_image_label: "Question Image (Optional)",
+    q_image_preview_alt: "Image Preview",
+    q_options_label: "Multiple Choice Options (4 Choices)",
+    q_correct_label: "Correct Answer",
+    q_correct_placeholder: "Enter the correct answer (must match the option text exactly for multiple-choice)",
+    btn_cancel: "Cancel",
+    btn_save: "Save Question",
+    admin_list_title: "Registered Questions List",
+    q_preview_correct: "Correct Answer",
+    admin_stats_title: "Live Results & Statistics",
+    admin_reset_btn: "Reset All Quiz Data",
+    stat_players_label: "Total Players",
+    stat_avg_label: "Average Score",
+    live_status_title: "Live Standings & Rankings",
+    qr_access_title: "Mobile Quick Access",
+    qr_access_desc: "Scan with your phone camera on the same Wi-Fi network to enter immediately.",
+    
+    // Dynamic Previews
+    q_preview_empty_title: "No questions registered.",
+    q_preview_empty_desc: "Please wait until the admin creates questions.",
+    admin_list_empty: "No questions found. Click 'Add New Question' to start.",
+    leaderboard_empty: "No participants have completed the quiz yet.",
+    
+    // Alerts/Prompts
+    alert_join_empty: "Please enter a nickname.",
+    alert_join_fail: "Failed to join.",
+    alert_server_error: "Failed to connect to server. Please verify the server is running.",
+    alert_profile_missing: "Participant profile missing. Please log in again.",
+    alert_unanswered: "You have {count} unanswered questions. Submit anyway?",
+    alert_submit_fail: "Failed to submit answers.",
+    alert_submit_error: "Error occurred during submission.",
+    alert_mcq_options_empty: "Please fill out all 4 multiple-choice options.",
+    alert_question_save_error: "Error occurred while saving question.",
+    alert_question_delete_confirm: "Are you sure you want to delete this question?",
+    alert_question_delete_fail: "Failed to delete question.",
+    alert_reset_confirm: "WARNING: All participant scores and records will be wiped out. Continue?",
+    alert_reset_success: "All quiz results reset successfully.",
+    alert_reset_fail: "Failed to reset.",
+    alert_image_size: "Image size is too large (max 2MB). Please select a smaller image."
+  }
+};
+
+// ==========================================================================
 // APP STATE & CONFIGURATION
 // ==========================================================================
 const API_BASE = window.location.origin; // Same origin (e.g. http://localhost:8000)
@@ -11,7 +248,8 @@ let state = {
   results: [],
   pollingInterval: null,
   editingQuestionId: null, // null if adding new
-  currentQuestionImage: null // Base64 string of the selected image
+  currentQuestionImage: null, // Base64 string of the selected image
+  currentLang: localStorage.getItem('quiz_lang') || 'ko'
 };
 
 // ==========================================================================
@@ -74,6 +312,9 @@ function initElements() {
   el.qImagePreviewContainer = document.getElementById('q-image-preview-container');
   el.qImagePreview = document.getElementById('q-image-preview');
   el.btnRemoveImage = document.getElementById('btn-remove-image');
+
+  // Lang Select
+  el.langSelect = document.getElementById('lang-select');
 }
 
 // ==========================================================================
@@ -105,6 +346,13 @@ function setupEventListeners() {
     el.btnRemoveImage.addEventListener('click', handleImageRemove);
   }
 
+  // Language selection change
+  if (el.langSelect) {
+    el.langSelect.addEventListener('change', (e) => {
+      applyLanguage(e.target.value);
+    });
+  }
+
   // Admin Add New/Edit Questions Toggle
   el.btnNewQuestion.addEventListener('click', () => showQuestionForm());
   el.btnCancelEdit.addEventListener('click', hideQuestionForm);
@@ -114,6 +362,57 @@ function setupEventListeners() {
 
   // Reset Quiz
   el.btnResetQuiz.addEventListener('click', handleResetQuiz);
+}
+
+// ==========================================================================
+// TRANSLATION HELPER FUNCTIONS
+// ==========================================================================
+function t(key) {
+  return translations[state.currentLang][key] || key;
+}
+
+function applyLanguage(lang) {
+  state.currentLang = lang;
+  localStorage.setItem('quiz_lang', lang);
+  if (el.langSelect) {
+    el.langSelect.value = lang;
+  }
+  
+  const dict = translations[lang];
+  if (!dict) return;
+
+  // Translate static texts
+  document.querySelectorAll('[data-i18n]').forEach(element => {
+    const key = element.getAttribute('data-i18n');
+    if (dict[key]) {
+      element.textContent = dict[key];
+    }
+  });
+
+  // Translate placeholders
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
+    const key = element.getAttribute('data-i18n-placeholder');
+    if (dict[key]) {
+      element.placeholder = dict[key];
+    }
+  });
+  
+  // Translate tooltips/titles
+  document.querySelectorAll('[data-i18n-title]').forEach(element => {
+    const key = element.getAttribute('data-i18n-title');
+    if (dict[key]) {
+      element.title = dict[key];
+    }
+  });
+
+  // Re-run dynamic rendering to update current outputs
+  if (state.activeTab === 'student') {
+    renderStudentQuiz();
+  } else {
+    renderAdminQuestions();
+  }
+  renderLeaderboards();
+  updateAdminStats();
 }
 
 // ==========================================================================
@@ -147,6 +446,7 @@ function switchTab(tab) {
 }
 
 function checkRoute() {
+  applyLanguage(state.currentLang); // Apply saved/default language on load
   const path = window.location.pathname;
   if (path === '/admin') {
     switchTab('admin');
@@ -160,7 +460,7 @@ function handleImageSelect(e) {
   if (!file) return;
 
   if (file.size > 2 * 1024 * 1024) {
-    alert("이미지 용량이 너무 큽니다 (최대 2MB). 더 작은 이미지를 사용해 주세요.");
+    alert(t('alert_image_size'));
     el.qImageFile.value = '';
     return;
   }
@@ -207,6 +507,23 @@ function stopPolling() {
   }
 }
 
+// Refresh state on start or tab change
+async function refreshState() {
+  await fetchQuestions();
+  await fetchResults();
+  await setupQrCode();
+
+  // If user has a nickname saved in session, check if they are registered/submitted
+  if (state.nickname) {
+    el.displayNickname.textContent = state.nickname;
+    
+    // Switch tab/view accordingly
+    switchTab('student');
+  } else {
+    switchTab('student');
+  }
+}
+
 let qrCodeInstance = null;
 
 async function setupQrCode() {
@@ -238,23 +555,6 @@ async function setupQrCode() {
     }
   } catch (error) {
     console.error('Error setting up QR Code:', error);
-  }
-}
-
-// Refresh state on start or tab change
-async function refreshState() {
-  await fetchQuestions();
-  await fetchResults();
-  await setupQrCode();
-
-  // If user has a nickname saved in session, check if they are registered/submitted
-  if (state.nickname) {
-    el.displayNickname.textContent = state.nickname;
-    
-    // Switch tab/view accordingly
-    switchTab('student');
-  } else {
-    switchTab('student');
   }
 }
 
@@ -300,7 +600,10 @@ async function fetchResults() {
 async function handleJoinSubmit(e) {
   e.preventDefault();
   const nickname = el.studentNicknameInput.value.trim();
-  if (!nickname) return;
+  if (!nickname) {
+    alert(t('alert_join_empty'));
+    return;
+  }
 
   try {
     const res = await fetch(`${API_BASE}/api/join`, {
@@ -311,7 +614,7 @@ async function handleJoinSubmit(e) {
 
     const data = await res.json();
     if (!res.ok) {
-      alert(data.error || '입장에 실패했습니다.');
+      alert(data.error || t('alert_join_fail'));
       return;
     }
 
@@ -326,7 +629,7 @@ async function handleJoinSubmit(e) {
     updateProgressBar();
   } catch (error) {
     console.error('Error joining:', error);
-    alert('서버 연결에 실패했습니다. 서버가 실행 중인지 확인하세요.');
+    alert(t('alert_server_error'));
   }
 }
 
@@ -335,7 +638,7 @@ async function handleQuizSubmit(e) {
   e.preventDefault();
   
   if (!state.nickname) {
-    alert('참가자 정보가 없습니다. 다시 로그인해 주세요.');
+    alert(t('alert_profile_missing'));
     switchTab('student');
     return;
   }
@@ -343,7 +646,8 @@ async function handleQuizSubmit(e) {
   // Validate all questions are answered
   const unansweredCount = state.questions.length - Object.keys(state.answers).length;
   if (unansweredCount > 0) {
-    if (!confirm(`아직 풀지 않은 문제가 ${unansweredCount}개 있습니다. 이대로 제출할까요?`)) {
+    const msg = t('alert_unanswered').replace('{count}', unansweredCount);
+    if (!confirm(msg)) {
       return;
     }
   }
@@ -360,7 +664,7 @@ async function handleQuizSubmit(e) {
 
     const data = await res.json();
     if (!res.ok) {
-      alert(data.error || '제출에 실패했습니다.');
+      alert(data.error || t('alert_submit_fail'));
       return;
     }
 
@@ -377,7 +681,7 @@ async function handleQuizSubmit(e) {
     startPolling();
   } catch (error) {
     console.error('Error submitting quiz:', error);
-    alert('서버 제출 도중 오류가 발생했습니다.');
+    alert(t('alert_submit_error'));
   }
 }
 
@@ -398,7 +702,7 @@ async function handleQuestionSubmit(e) {
       document.getElementById('opt-3').value.trim()
     ];
     if (options.some(opt => !opt)) {
-      alert('객관식 보기 4개를 모두 채워주세요.');
+      alert(t('alert_mcq_options_empty'));
       return;
     }
   }
@@ -426,13 +730,13 @@ async function handleQuestionSubmit(e) {
     hideQuestionForm();
   } catch (error) {
     console.error('Error saving question:', error);
-    alert('문제를 저장하는 도중 오류가 발생했습니다.');
+    alert(t('alert_question_save_error'));
   }
 }
 
 // Delete Question (Admin)
 async function deleteQuestion(qId) {
-  if (!confirm('정말로 이 문제를 삭제하시겠습니까?')) return;
+  if (!confirm(t('alert_question_delete_confirm'))) return;
 
   try {
     const res = await fetch(`${API_BASE}/api/questions/${qId}`, {
@@ -443,13 +747,13 @@ async function deleteQuestion(qId) {
     await fetchQuestions();
   } catch (error) {
     console.error('Error deleting question:', error);
-    alert('문제 삭제에 실패했습니다.');
+    alert(t('alert_question_delete_fail'));
   }
 }
 
 // Reset Quiz Data (Admin)
 async function handleResetQuiz() {
-  if (!confirm('경고: 모든 참가자의 기록과 채점 점수가 초기화됩니다. 계속하시겠습니까?')) return;
+  if (!confirm(t('alert_reset_confirm'))) return;
 
   try {
     const res = await fetch(`${API_BASE}/api/reset`, {
@@ -463,7 +767,7 @@ async function handleResetQuiz() {
     state.answers = {};
 
     await fetchResults();
-    alert('모든 응시 결과가 성공적으로 초기화되었습니다.');
+    alert(t('alert_reset_success'));
     
     // If we're on student tab, go back to join screen
     if (state.activeTab === 'student') {
@@ -471,7 +775,7 @@ async function handleResetQuiz() {
     }
   } catch (error) {
     console.error('Error resetting quiz:', error);
-    alert('초기화에 실패했습니다.');
+    alert(t('alert_reset_fail'));
   }
 }
 
@@ -497,8 +801,8 @@ function renderStudentQuiz() {
     el.questionsContainer.innerHTML = `
       <div class="card text-center" style="padding: 3rem;">
         <i data-lucide="help-circle" style="width: 3rem; height: 3rem; margin: 0 auto 1rem auto; color: var(--text-muted);"></i>
-        <h3>등록된 문제가 없습니다.</h3>
-        <p style="color: var(--text-muted);">관리자가 문제를 출제할 때까지 기다려 주세요.</p>
+        <h3>${t('q_preview_empty_title')}</h3>
+        <p style="color: var(--text-muted);">${t('q_preview_empty_desc')}</p>
       </div>
     `;
     lucide.createIcons();
@@ -514,10 +818,10 @@ function renderStudentQuiz() {
     // Number Badge
     const badge = document.createElement('span');
     badge.className = 'q-num-badge';
-    badge.textContent = `문제 ${idx + 1}`;
+    badge.textContent = `Q ${idx + 1}`;
     qCard.appendChild(badge);
 
-    // Question Text
+    // Question Text (Will not translate user text)
     const text = document.createElement('div');
     text.className = 'q-text';
     text.textContent = q.questionText;
@@ -528,7 +832,7 @@ function renderStudentQuiz() {
       const img = document.createElement('img');
       img.src = q.imageUrl;
       img.className = 'question-image';
-      img.alt = `문제 ${idx + 1} 이미지`;
+      img.alt = `Question ${idx + 1} Image`;
       qCard.appendChild(img);
     }
 
@@ -577,7 +881,7 @@ function renderStudentQuiz() {
 
       const textarea = document.createElement('textarea');
       textarea.rows = 2;
-      textarea.placeholder = '주관식 정답을 적어주세요. (띄어쓰기 유의)';
+      textarea.placeholder = t('short_answer_placeholder_text') || '정답을 직접 입력하세요.';
       textarea.value = state.answers[q.id] || '';
 
       textarea.addEventListener('input', (e) => {
@@ -608,7 +912,7 @@ function renderAdminQuestions() {
   if (state.questions.length === 0) {
     el.adminQuestionsList.innerHTML = `
       <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
-        등록된 문제가 없습니다. '새 문제 추가'를 클릭해 퀴즈를 만드세요.
+        ${t('admin_list_empty')}
       </div>
     `;
     return;
@@ -631,7 +935,7 @@ function renderAdminQuestions() {
     
     const badge = document.createElement('span');
     badge.className = `q-type-badge ${q.type === 'multiple-choice' ? 'type-mcq' : 'type-sa'}`;
-    badge.textContent = q.type === 'multiple-choice' ? '객관식' : '주관식';
+    badge.textContent = q.type === 'multiple-choice' ? t('q_type_mcq_short') : t('q_type_sa_short');
 
     meta.appendChild(num);
     meta.appendChild(badge);
@@ -643,13 +947,13 @@ function renderAdminQuestions() {
 
     const editBtn = document.createElement('button');
     editBtn.className = 'btn-icon edit';
-    editBtn.title = '수정';
+    editBtn.title = t('btn_edit') || '수정';
     editBtn.innerHTML = '<i data-lucide="edit-3"></i>';
     editBtn.addEventListener('click', () => editQuestion(q));
 
     const delBtn = document.createElement('button');
     delBtn.className = 'btn-icon delete';
-    delBtn.title = '삭제';
+    delBtn.title = t('btn_delete') || '삭제';
     delBtn.innerHTML = '<i data-lucide="trash-2"></i>';
     delBtn.addEventListener('click', () => deleteQuestion(q.id));
 
@@ -689,7 +993,7 @@ function renderAdminQuestions() {
     // Correct Answer
     const corr = document.createElement('div');
     corr.className = 'admin-question-correct text-emerald';
-    corr.innerHTML = `<i data-lucide="check-circle-2"></i> 정답: <strong>${q.correctAnswer}</strong>`;
+    corr.innerHTML = `<i data-lucide="check-circle-2"></i> ${t('q_preview_correct')}: <strong>${q.correctAnswer}</strong>`;
     item.appendChild(corr);
 
     el.adminQuestionsList.appendChild(item);
@@ -708,7 +1012,7 @@ function renderLeaderboards() {
     const emptyRow = `
       <tr>
         <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 2rem;">
-          아직 퀴즈를 완료한 응시자가 없습니다.
+          ${t('leaderboard_empty')}
         </td>
       </tr>
     `;
@@ -741,7 +1045,7 @@ function renderLeaderboards() {
       <td>${rankBadge}</td>
       <td><strong>${p.nickname}</strong> ${isCurrentUser ? '<span class="text-gold">(나)</span>' : ''}</td>
       <td>${p.correctCount} / ${p.totalCount}</td>
-      <td><span class="text-emerald" style="font-weight: 800;">${p.score}점</span></td>
+      <td><span class="text-emerald" style="font-weight: 800;">${p.score}${t('score_label')}</span></td>
       <td style="color: var(--text-muted); font-size: 0.8rem;">${timeStr}</td>
     `;
     el.studentLeaderboardBody.appendChild(studentRow);
@@ -751,7 +1055,7 @@ function renderLeaderboards() {
     adminRow.innerHTML = `
       <td>${rankBadge}</td>
       <td><strong>${p.nickname}</strong></td>
-      <td><span class="status-badge status-completed">완료</span></td>
+      <td><span class="status-badge status-completed">${t('state_completed')}</span></td>
       <td><span style="font-weight: 700;">${p.score}%</span> (${p.correctCount}/${p.totalCount})</td>
       <td style="color: var(--text-muted); font-size: 0.8rem;">${timeStr}</td>
     `;
@@ -762,24 +1066,24 @@ function renderLeaderboards() {
 // 4. Update Stats Box in Admin
 function updateAdminStats() {
   const total = state.results.length;
-  el.statTotalPlayers.textContent = total;
+  if (el.statTotalPlayers) el.statTotalPlayers.textContent = total;
 
   if (total === 0) {
-    el.statAvgScore.textContent = '0%';
+    if (el.statAvgScore) el.statAvgScore.textContent = '0%';
     return;
   }
 
   const sum = state.results.reduce((acc, curr) => acc + curr.score, 0);
   const avg = Math.round(sum / total);
-  el.statAvgScore.textContent = `${avg}%`;
+  if (el.statAvgScore) el.statAvgScore.textContent = `${avg}%`;
 }
 
 // ==========================================================================
 // ADMIN QUESTION FORM BEHAVIORS
 // ==========================================================================
-function showQuestionForm(title = '새 문제 추가', q = null) {
+function showQuestionForm(titleKey = 'admin_form_new', q = null) {
   el.questionFormContainer.classList.remove('hidden');
-  el.questionFormTitle.textContent = title;
+  el.questionFormTitle.textContent = t(titleKey);
   
   if (q) {
     // Editing existing
@@ -831,7 +1135,7 @@ function hideQuestionForm() {
 }
 
 function editQuestion(q) {
-  showQuestionForm('문제 편집', q);
+  showQuestionForm('admin_form_edit', q);
 }
 
 function clearMcqOptionFields() {

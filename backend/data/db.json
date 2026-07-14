@@ -31,16 +31,5 @@
       "correctAnswer": "Class"
     }
   ],
-  "participants": [
-    {
-      "nickname": "가누",
-      "score": 33,
-      "correctCount": 1,
-      "totalCount": 3,
-      "submittedAt": "2026-07-13T13:26:52.032100Z",
-      "answers": {
-        "q1": "서울"
-      }
-    }
-  ]
+  "participants": []
 }
