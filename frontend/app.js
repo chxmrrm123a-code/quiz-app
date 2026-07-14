@@ -439,6 +439,7 @@ function switchTab(tab) {
   } else {
     // Admin View
     showView('view-admin');
+    setupQrCode();
     fetchQuestions();
     fetchResults();
     startPolling();

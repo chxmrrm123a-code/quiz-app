@@ -31,5 +31,14 @@
       "correctAnswer": "Class"
     }
   ],
-  "participants": []
+  "participants": [
+    {
+      "nickname": "ㄴ",
+      "score": null,
+      "correctCount": null,
+      "totalCount": null,
+      "submittedAt": null,
+      "answers": {}
+    }
+  ]
 }
