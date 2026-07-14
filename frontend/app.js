@@ -70,6 +70,7 @@ const translations = {
     btn_delete: "삭제",
     btn_export: "내보내기",
     btn_import: "불러오기",
+    btn_clear: "비우기",
     admin_list_title: "등록된 문제 목록",
     q_preview_correct: "정답",
     admin_stats_title: "실시간 응시 결과 & 통계",
@@ -184,6 +185,7 @@ const translations = {
     btn_delete: "Xóa",
     btn_export: "Xuất file",
     btn_import: "Nhập file",
+    btn_clear: "Xóa",
     admin_list_title: "Danh sách câu hỏi đã đăng ký",
     q_preview_correct: "Đáp án",
     admin_stats_title: "Kết quả & Thống kê trực tiếp",
@@ -298,6 +300,7 @@ const translations = {
     btn_delete: "Delete",
     btn_export: "Export",
     btn_import: "Import",
+    btn_clear: "Clear",
     admin_list_title: "Registered Questions List",
     q_preview_correct: "Correct Answer",
     admin_stats_title: "Live Results & Statistics",
@@ -425,6 +428,7 @@ function initElements() {
   el.btnExportQuestions = document.getElementById('btn-export-questions');
   el.btnImportQuestions = document.getElementById('btn-import-questions');
   el.importFile = document.getElementById('import-file');
+  el.btnClearOpt5 = document.getElementById('btn-clear-opt5');
   el.btnToggleExam = document.getElementById('btn-toggle-exam');
   el.toggleExamText = document.getElementById('toggle-exam-text');
   el.questionFormTitle = document.getElementById('question-form-title');
@@ -512,6 +516,14 @@ function setupEventListeners() {
   el.btnExportQuestions.addEventListener('click', handleExportQuestions);
   el.btnImportQuestions.addEventListener('click', () => el.importFile.click());
   el.importFile.addEventListener('change', handleImportQuestions);
+
+  // Clear Option E
+  if (el.btnClearOpt5) {
+    el.btnClearOpt5.addEventListener('click', () => {
+      const opt4 = document.getElementById('opt-4');
+      if (opt4) opt4.value = '';
+    });
+  }
 
   // Lock / Unlock Exam State
   el.btnToggleExam.addEventListener('click', handleToggleExamState);

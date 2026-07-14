@@ -312,9 +312,12 @@
                   <span class="opt-num">4</span>
                   <input type="text" id="opt-3" placeholder="D" required>
                 </div>
-                <div class="option-input-row">
+                <div class="option-input-row" style="display: flex; gap: 0.5rem; align-items: center;">
                   <span class="opt-num">5</span>
-                  <input type="text" id="opt-4" placeholder="E">
+                  <input type="text" id="opt-4" placeholder="E" style="flex: 1;">
+                  <button type="button" id="btn-clear-opt5" class="btn btn-secondary btn-sm" style="padding: 0 0.8rem; height: 38px; display: flex; align-items: center; justify-content: center; gap: 0.3rem;" title="5번 보기 비우기">
+                    <i data-lucide="x-circle" style="width: 16px; height: 16px;"></i> <span data-i18n="btn_clear">비우기</span>
+                  </button>
                 </div>
               </div>
 
