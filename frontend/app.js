@@ -40,6 +40,15 @@ const translations = {
     wait_title: "시험 대기 중...",
     wait_desc: "선생님이 시험을 시작하실 때까지 대기해 주세요. 시작 시 자동으로 화면이 전환됩니다.",
     timer_label: "남은 시간:",
+    modal_detail_title: "답안 상세 내역",
+    btn_close: "닫기",
+    stats_correct_rate: "정답률",
+    stats_correct_rate_empty: "정답률: - (제출 없음)",
+    stats_correct_rate_format: "정답률: {rate}% ({total}명 중 {correct}명 맞힘)",
+    detail_q_num: "{num}번 문제",
+    detail_user_ans: "선택한 답안",
+    detail_correct_ans: "실제 정답",
+    detail_unanswered: "(무응답)",
     
     // Teacher PIN Login
     admin_login_title: "선생님(관리자) 인증",
@@ -156,6 +165,15 @@ const translations = {
     wait_title: "Đang chờ thi...",
     wait_desc: "Vui lòng đợi giáo viên bắt đầu bài thi. Màn hình sẽ tự động chuyển khi bắt đầu.",
     timer_label: "Thời gian còn lại:",
+    modal_detail_title: "Chi tiết bài làm",
+    btn_close: "Đóng",
+    stats_correct_rate: "Tỉ lệ đúng",
+    stats_correct_rate_empty: "Tỉ lệ đúng: - (Chưa nộp)",
+    stats_correct_rate_format: "Tỉ lệ đúng: {rate}% (Đúng {correct}/{total} thí sinh)",
+    detail_q_num: "Câu {num}",
+    detail_user_ans: "Bài làm của thí sinh",
+    detail_correct_ans: "Đáp án đúng",
+    detail_unanswered: "(Không trả lời)",
     
     // Teacher PIN Login
     admin_login_title: "Xác thực Giáo viên",
@@ -272,6 +290,15 @@ const translations = {
     wait_title: "Waiting for Exam...",
     wait_desc: "Please wait until the teacher starts the exam. The screen will automatically transition when started.",
     timer_label: "Time Remaining:",
+    modal_detail_title: "Detailed Answers",
+    btn_close: "Close",
+    stats_correct_rate: "Correct Rate",
+    stats_correct_rate_empty: "Correct Rate: - (No submissions)",
+    stats_correct_rate_format: "Correct Rate: {rate}% ({correct}/{total} correct)",
+    detail_q_num: "Question {num}",
+    detail_user_ans: "Student Answer",
+    detail_correct_ans: "Correct Answer",
+    detail_unanswered: "(Unanswered)",
     
     // Teacher PIN Login
     admin_login_title: "Teacher Authentication",
@@ -411,6 +438,12 @@ function initElements() {
   el.quizTimerBanner = document.getElementById('quiz-timer-banner');
   el.timerCountdown = document.getElementById('timer-countdown');
   
+  el.studentDetailModal = document.getElementById('student-detail-modal');
+  el.modalStudentName = document.getElementById('modal-student-name');
+  el.modalStudentAnswersList = document.getElementById('modal-student-answers-list');
+  el.btnCloseModal = document.getElementById('btn-close-modal');
+  el.btnCloseModalFooter = document.getElementById('btn-close-modal-footer');
+  
   el.btnCreateRoom = document.getElementById('btn-create-room');
   el.adminRoomEnterForm = document.getElementById('admin-room-enter-form');
   el.adminRoomCodeInput = document.getElementById('admin-room-code-input');
@@ -534,6 +567,21 @@ function setupEventListeners() {
 
   // Lock / Unlock Exam State
   el.btnToggleExam.addEventListener('click', handleToggleExamState);
+
+  // Close Student Detail Modal
+  if (el.btnCloseModal) {
+    el.btnCloseModal.addEventListener('click', () => el.studentDetailModal.classList.add('hidden'));
+  }
+  if (el.btnCloseModalFooter) {
+    el.btnCloseModalFooter.addEventListener('click', () => el.studentDetailModal.classList.add('hidden'));
+  }
+  if (el.studentDetailModal) {
+    el.studentDetailModal.addEventListener('click', (e) => {
+      if (e.target === el.studentDetailModal) {
+        el.studentDetailModal.classList.add('hidden');
+      }
+    });
+  }
 }
 
 // ==========================================================================
@@ -1527,6 +1575,47 @@ function renderAdminQuestions() {
     corr.innerHTML = `<i data-lucide="check-circle-2"></i> ${t('q_preview_correct')}: <strong>${q.correctAnswer}</strong>`;
     item.appendChild(corr);
 
+    // Calculate Correct Rate Statistics
+    const submittedParticipants = state.results.filter(p => p.score !== null);
+    const totalSubmitted = submittedParticipants.length;
+    let statsHtml = '';
+    
+    if (totalSubmitted === 0) {
+      statsHtml = `<span style="font-size: 0.78rem; font-weight: 500; color: var(--text-muted);"><i data-lucide="info" style="width: 12px; height: 12px; display: inline-block; vertical-align: middle; margin-right: 3px;"></i>${t('stats_correct_rate_empty')}</span>`;
+    } else {
+      let correctCount = 0;
+      submittedParticipants.forEach(p => {
+        const userAns = p.answers && p.answers[q.id];
+        if (userAns && String(userAns).trim().toLowerCase() === String(q.correctAnswer).trim().toLowerCase()) {
+          correctCount++;
+        }
+      });
+      const rate = Math.round((correctCount / totalSubmitted) * 100);
+      
+      let rateColor = '#ef4444'; // Red
+      if (rate >= 70) {
+        rateColor = '#10b981'; // Green
+      } else if (rate >= 40) {
+        rateColor = '#f59e0b'; // Orange
+      }
+      
+      const formatStr = t('stats_correct_rate_format')
+        .replace('{rate}', rate)
+        .replace('{total}', totalSubmitted)
+        .replace('{correct}', correctCount);
+        
+      statsHtml = `<span style="font-size: 0.78rem; font-weight: 700; color: ${rateColor}; display: flex; align-items: center; gap: 0.3rem;"><i data-lucide="pie-chart" style="width: 13px; height: 13px;"></i>${formatStr}</span>`;
+    }
+    
+    const statsContainer = document.createElement('div');
+    statsContainer.style.marginTop = '0.5rem';
+    statsContainer.style.padding = '0.4rem 0.6rem';
+    statsContainer.style.background = 'rgba(255, 255, 255, 0.02)';
+    statsContainer.style.border = '1px dashed var(--border-color)';
+    statsContainer.style.borderRadius = 'var(--radius-sm)';
+    statsContainer.innerHTML = statsHtml;
+    item.appendChild(statsContainer);
+
     el.adminQuestionsList.appendChild(item);
   });
 
@@ -1620,6 +1709,18 @@ function renderLeaderboards() {
       : `-`;
 
     const adminRow = document.createElement('tr');
+    
+    if (isCompleted) {
+      adminRow.style.cursor = 'pointer';
+      adminRow.title = state.currentLang === 'ko' ? "클릭하여 상세 답안지 확인" : (state.currentLang === 'vi' ? "Click để xem chi tiết bài làm" : "Click to view detailed answer sheet");
+      adminRow.addEventListener('click', () => {
+        showStudentDetailModal(p);
+      });
+    } else {
+      adminRow.style.opacity = '0.75';
+      adminRow.title = state.currentLang === 'ko' ? "현재 시험 진행 중인 학생입니다" : (state.currentLang === 'vi' ? "Thí sinh đang làm bài" : "Student is currently taking the exam");
+    }
+
     adminRow.innerHTML = `
       <td>${rankBadge}</td>
       <td><strong>${p.nickname}</strong></td>
@@ -1630,6 +1731,84 @@ function renderLeaderboards() {
     `;
     el.adminLeaderboardBody.appendChild(adminRow);
   });
+}
+
+function showStudentDetailModal(p) {
+  if (!el.studentDetailModal) return;
+  
+  el.modalStudentName.textContent = p.nickname;
+  el.modalStudentAnswersList.innerHTML = '';
+  
+  state.questions.forEach((q, idx) => {
+    const qCard = document.createElement('div');
+    qCard.className = 'modal-q-card';
+    
+    const meta = document.createElement('div');
+    meta.className = 'modal-q-meta';
+    
+    const num = document.createElement('span');
+    num.textContent = t('detail_q_num').replace('{num}', idx + 1);
+    meta.appendChild(num);
+    
+    const typeBadge = document.createElement('span');
+    typeBadge.className = `q-type-badge ${q.type === 'multiple-choice' ? 'type-mcq' : 'type-sa'}`;
+    typeBadge.style.fontSize = '0.7rem';
+    typeBadge.style.padding = '0.1rem 0.3rem';
+    typeBadge.textContent = q.type === 'multiple-choice' ? t('q_type_mcq_short') : t('q_type_sa_short');
+    meta.appendChild(typeBadge);
+    
+    qCard.appendChild(meta);
+    
+    const text = document.createElement('div');
+    text.className = 'modal-q-text';
+    text.textContent = q.questionText;
+    qCard.appendChild(text);
+    
+    if (q.imageUrl) {
+      const img = document.createElement('img');
+      img.src = q.imageUrl;
+      img.style.maxHeight = '80px';
+      img.style.borderRadius = 'var(--radius-sm)';
+      img.style.objectFit = 'contain';
+      qCard.appendChild(img);
+    }
+    
+    // User answer
+    const userAns = p.answers && p.answers[q.id] !== undefined ? p.answers[q.id] : '';
+    const userAnsStr = userAns !== '' ? String(userAns).trim() : t('detail_unanswered');
+    const isCorrect = userAns !== '' && String(userAns).trim().toLowerCase() === String(q.correctAnswer).trim().toLowerCase();
+    
+    const userAnsRow = document.createElement('div');
+    userAnsRow.className = `modal-ans-row ${isCorrect ? 'correct' : 'incorrect'}`;
+    
+    const icon = document.createElement('i');
+    icon.setAttribute('data-lucide', isCorrect ? 'check-circle' : 'x-circle');
+    icon.style.width = '16px';
+    icon.style.height = '16px';
+    
+    const textSpan = document.createElement('span');
+    textSpan.innerHTML = `${t('detail_user_ans')}: <strong>${userAnsStr}</strong>`;
+    
+    userAnsRow.appendChild(icon);
+    userAnsRow.appendChild(textSpan);
+    qCard.appendChild(userAnsRow);
+    
+    // If incorrect, show correct answer
+    if (!isCorrect) {
+      const correctRow = document.createElement('div');
+      correctRow.style.fontSize = '0.85rem';
+      correctRow.style.color = '#34d399';
+      correctRow.style.paddingLeft = '0.5rem';
+      correctRow.style.marginTop = '0.2rem';
+      correctRow.innerHTML = `<i data-lucide="check" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i>${t('detail_correct_ans')}: <strong>${q.correctAnswer}</strong>`;
+      qCard.appendChild(correctRow);
+    }
+    
+    el.modalStudentAnswersList.appendChild(qCard);
+  });
+  
+  el.studentDetailModal.classList.remove('hidden');
+  lucide.createIcons();
 }
 
 // 4. Update Stats Box in Admin

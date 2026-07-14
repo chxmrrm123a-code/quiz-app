@@ -413,6 +413,70 @@
         </div>
 
       </section>
+
+      <!-- Modal for Student Detailed Answers -->
+      <div id="student-detail-modal" class="modal hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.75); display: flex; align-items: center; justify-content: center; z-index: 10000; padding: 1.5rem; backdrop-filter: blur(8px);">
+        <div class="card" style="width: 100%; max-width: 600px; max-height: 80vh; display: flex; flex-direction: column; padding: 1.8rem; box-shadow: var(--shadow-xl); border: 1px solid var(--border-color); border-radius: var(--radius-lg); background: var(--bg-card); animation: modalFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);">
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.8rem; margin-bottom: 1.2rem;">
+            <h3 style="margin: 0; font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem; color: var(--text-light);">
+              <i data-lucide="clipboard-list" class="text-indigo"></i>
+              <span id="modal-student-name" style="color: var(--primary);">홍길동</span> <span data-i18n="modal_detail_title" style="font-weight: 500; font-size: 1.15rem; color: var(--text-muted);">학생 답안 상세</span>
+            </h3>
+            <button type="button" id="btn-close-modal" style="background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-muted); padding: 0.2rem; display: flex; align-items: center; justify-content: center; transition: color 0.2s;"><i data-lucide="x" style="width: 20px; height: 20px;"></i></button>
+          </div>
+          <div id="modal-student-answers-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; padding-right: 0.5rem; margin-bottom: 1.2rem;" class="admin-questions-scroll">
+            <!-- Dynamically rendered detailed sheets -->
+          </div>
+          <div style="display: flex; justify-content: flex-end; border-top: 1px solid var(--border-color); padding-top: 0.8rem;">
+            <button type="button" id="btn-close-modal-footer" class="btn btn-secondary btn-sm" style="padding: 0.4rem 1.2rem;"><span data-i18n="btn_close">닫기</span></button>
+          </div>
+        </div>
+        <style>
+          @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.95) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+          }
+          .modal-q-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+          }
+          .modal-q-meta {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+          }
+          .modal-q-text {
+            font-weight: 600;
+            color: var(--text-light);
+            margin-bottom: 0.3rem;
+          }
+          .modal-ans-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+          }
+          .modal-ans-row.correct {
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: #34d399;
+          }
+          .modal-ans-row.incorrect {
+            background: rgba(239, 68, 68, 0.08);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #f87171;
+          }
+        </style>
+      </div>
     </main>
   </div>
 
