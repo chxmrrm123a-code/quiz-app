@@ -73,6 +73,16 @@
         </form>
       </section>
 
+      <!-- ================= STUDENT: WAIT VIEW (LOCK) ================= -->
+      <section id="view-wait" class="card view-section text-center" style="max-width: 520px; margin: 3rem auto; padding: 3rem 2rem;">
+        <div class="wait-icon-container">
+          <div class="spinner"></div>
+          <i data-lucide="lock" class="wait-lock-icon"></i>
+        </div>
+        <h2 data-i18n="wait_title">시험 대기 중...</h2>
+        <p data-i18n="wait_desc" style="color: var(--text-muted); margin-top: 1rem;">선생님이 시험을 시작하실 때까지 대기해 주세요. 시작 시 자동으로 화면이 전환됩니다.</p>
+      </section>
+
       <!-- ================= STUDENT: QUIZ VIEW ================= -->
       <section id="view-quiz" class="view-section">
         <div class="quiz-info-bar card">
@@ -160,6 +170,30 @@
         </div>
       </section>
 
+      <!-- ================= TEACHER: PIN LOGIN VIEW ================= -->
+      <section id="view-admin-login" class="card view-section" style="max-width: 460px; margin: 4rem auto;">
+        <div class="welcome-hero">
+          <div class="hero-icon-container" style="background: rgba(99, 102, 241, 0.1); border-color: rgba(99, 102, 241, 0.2); color: var(--primary);">
+            <i data-lucide="shield-check" class="hero-icon"></i>
+          </div>
+          <h2 data-i18n="admin_login_title">선생님(관리자) 인증</h2>
+          <p data-i18n="admin_login_desc">대시보드에 진입하기 위한 PIN 번호를 입력하세요.</p>
+        </div>
+        
+        <form id="admin-login-form">
+          <div class="input-group">
+            <label for="admin-pin-input" data-i18n="admin_pin_label">PIN 번호 (기본값: 1234)</label>
+            <div class="input-with-icon">
+              <i data-lucide="key"></i>
+              <input type="password" id="admin-pin-input" data-i18n-placeholder="admin_pin_placeholder" placeholder="PIN 번호를 입력하세요" required>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">
+            <span data-i18n="admin_login_btn">인증하기</span> <i data-lucide="unlock"></i>
+          </button>
+        </form>
+      </section>
+
       <!-- ================= ADMIN: DASHBOARD VIEW ================= -->
       <section id="view-admin" class="view-section admin-grid">
         
@@ -167,9 +201,20 @@
         <div class="card admin-column">
           <div class="card-header">
             <h3><i data-lucide="file-edit" class="text-indigo"></i> <span data-i18n="admin_title">시험 문제 출제 & 편집</span></h3>
-            <button id="btn-new-question" class="btn btn-secondary btn-sm">
-              <i data-lucide="plus"></i> <span data-i18n="admin_new_btn">새 문제 추가</span>
-            </button>
+            
+            <div class="admin-actions">
+              <button id="btn-export-questions" class="btn btn-secondary btn-sm" data-i18n-title="admin_export_btn_title" title="문제지를 백업 파일로 내보내기">
+                <i data-lucide="download"></i> <span data-i18n="btn_export">내보내기</span>
+              </button>
+              <button id="btn-import-questions" class="btn btn-secondary btn-sm" data-i18n-title="admin_import_btn_title" title="백업 파일에서 문제지 불러오기">
+                <i data-lucide="upload"></i> <span data-i18n="btn_import">불러오기</span>
+              </button>
+              <input type="file" id="import-file" accept=".json" class="hidden">
+              
+              <button id="btn-new-question" class="btn btn-primary btn-sm">
+                <i data-lucide="plus"></i> <span data-i18n="admin_new_btn">새 문제 추가</span>
+              </button>
+            </div>
           </div>
 
           <!-- Question Edit Form -->
@@ -257,7 +302,7 @@
             </div>
           </div>
 
-          <div class="admin-stats-summary">
+          <div class="admin-stats-summary" style="grid-template-columns: repeat(3, 1fr);">
             <div class="stat-box">
               <span id="stat-total-players" class="stat-num">0</span>
               <span class="stat-label" data-i18n="stat_players_label">참가자 수</span>
@@ -265,6 +310,11 @@
             <div class="stat-box">
               <span id="stat-avg-score" class="stat-num">0%</span>
               <span class="stat-label" data-i18n="stat_avg_label">평균 점수</span>
+            </div>
+            <div class="stat-box" style="padding: 0.6rem; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+              <button id="btn-toggle-exam" class="btn btn-primary btn-block btn-sm" style="font-size: 0.8rem; padding: 0.5rem 0.8rem; height: 100%;">
+                <i data-lucide="lock" style="width: 14px; height: 14px;"></i> <span id="toggle-exam-text">시험지 잠금</span>
+              </button>
             </div>
           </div>
 
@@ -290,6 +340,7 @@
                     <th data-i18n="nickname_col">닉네임</th>
                     <th data-i18n="state_col">상태</th>
                     <th data-i18n="score_col">점수</th>
+                    <th data-i18n="cheats_col">화면 이탈</th>
                     <th data-i18n="time_col">제출 시간</th>
                   </tr>
                 </thead>

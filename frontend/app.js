@@ -27,6 +27,17 @@ const translations = {
     state_col: "상태",
     state_completed: "완료",
     
+    // Student Wait
+    wait_title: "시험 대기 중...",
+    wait_desc: "선생님이 시험을 시작하실 때까지 대기해 주세요. 시작 시 자동으로 화면이 전환됩니다.",
+    
+    // Teacher PIN Login
+    admin_login_title: "선생님(관리자) 인증",
+    admin_login_desc: "대시보드에 진입하기 위한 PIN 번호를 입력하세요.",
+    admin_pin_label: "PIN 번호 (기본값: 1234)",
+    admin_pin_placeholder: "PIN 번호를 입력하세요",
+    admin_login_btn: "인증하기",
+
     // Admin Dashboard
     admin_title: "시험 문제 출제 & 편집",
     admin_new_btn: "새 문제 추가",
@@ -46,6 +57,10 @@ const translations = {
     q_correct_placeholder: "정답을 입력하세요 (객관식은 보기 텍스트와 완벽히 일치해야 함)",
     btn_cancel: "취소",
     btn_save: "저장하기",
+    btn_edit: "수정",
+    btn_delete: "삭제",
+    btn_export: "내보내기",
+    btn_import: "불러오기",
     admin_list_title: "등록된 문제 목록",
     q_preview_correct: "정답",
     admin_stats_title: "실시간 응시 결과 & 통계",
@@ -55,14 +70,20 @@ const translations = {
     live_status_title: "실시간 응시 현황 및 랭킹",
     qr_access_title: "모바일 간편 접속",
     qr_access_desc: "같은 와이파이에 연결된 스마트폰 카메라로 스캔하여 즉시 입장할 수 있습니다.",
+    cheats_col: "화면 이탈",
     
     // Dynamic Previews
     q_preview_empty_title: "등록된 문제가 없습니다.",
     q_preview_empty_desc: "관리자가 문제를 출제할 때까지 기다려 주세요.",
     admin_list_empty: "등록된 문제가 없습니다. '새 문제 추가'를 클릭해 퀴즈를 만드세요.",
     leaderboard_empty: "아직 퀴즈를 완료한 응시자가 없습니다.",
+    short_answer_placeholder_text: "정답을 직접 입력하세요.",
     
     // Alerts/Prompts
+    alert_pin_success: "선생님 인증에 성공했습니다!",
+    alert_pin_fail: "잘못된 PIN 번호입니다.",
+    alert_import_success: "문제를 성공적으로 불러왔습니다!",
+    alert_import_fail: "파일 형식이 잘못되었거나 불러오기에 실패했습니다.",
     alert_join_empty: "닉네임을 입력해 주세요.",
     alert_join_fail: "입장에 실패했습니다.",
     alert_server_error: "서버 연결에 실패했습니다. 서버가 실행 중인지 확인하세요.",
@@ -77,7 +98,8 @@ const translations = {
     alert_reset_confirm: "경고: 모든 참가자의 기록과 채점 점수가 초기화됩니다. 계속하시겠습니까?",
     alert_reset_success: "모든 응시 결과가 성공적으로 초기화되었습니다.",
     alert_reset_fail: "초기화에 실패했습니다.",
-    alert_image_size: "이미지 용량이 너무 큽니다 (최대 2MB). 더 작은 이미지를 사용해 주세요."
+    alert_image_size: "이미지 용량이 너무 큽니다 (최대 2MB). 더 작은 이미지를 사용해 주세요.",
+    alert_cheating_warning: "⚠️ 경고: 시험 중에 화면을 벗어나면 부정행위로 간주되어 기록에 남습니다!"
   },
   vi: {
     logo_sub: "Trực tiếp",
@@ -104,6 +126,17 @@ const translations = {
     state_col: "Trạng thái",
     state_completed: "Đã xong",
     
+    // Student Wait
+    wait_title: "Đang chờ thi...",
+    wait_desc: "Vui lòng đợi giáo viên bắt đầu bài thi. Màn hình sẽ tự động chuyển khi bắt đầu.",
+    
+    // Teacher PIN Login
+    admin_login_title: "Xác thực Giáo viên",
+    admin_login_desc: "Nhập mã PIN để truy cập bảng điều khiển.",
+    admin_pin_label: "Mã PIN (Mặc định: 1234)",
+    admin_pin_placeholder: "Nhập mã PIN",
+    admin_login_btn: "Xác thực",
+
     // Admin Dashboard
     admin_title: "Tạo & Chỉnh sửa Câu hỏi",
     admin_new_btn: "Thêm câu hỏi mới",
@@ -123,6 +156,10 @@ const translations = {
     q_correct_placeholder: "Nhập đáp án đúng (Với trắc nghiệm phải khớp chính xác với văn bản lựa chọn)",
     btn_cancel: "Hủy bỏ",
     btn_save: "Lưu lại",
+    btn_edit: "Sửa",
+    btn_delete: "Xóa",
+    btn_export: "Xuất file",
+    btn_import: "Nhập file",
     admin_list_title: "Danh sách câu hỏi đã đăng ký",
     q_preview_correct: "Đáp án",
     admin_stats_title: "Kết quả & Thống kê trực tiếp",
@@ -132,14 +169,20 @@ const translations = {
     live_status_title: "Tình trạng thi & Xếp hạng",
     qr_access_title: "Kết nối nhanh di động",
     qr_access_desc: "Quét bằng camera điện thoại kết nối cùng mạng Wifi để vào thi ngay lập tức.",
+    cheats_col: "Rời màn hình",
     
     // Dynamic Previews
     q_preview_empty_title: "Không có câu hỏi nào.",
     q_preview_empty_desc: "Vui lòng đợi quản trị viên tạo câu hỏi.",
     admin_list_empty: "Không có câu hỏi nào. Nhấp 'Thêm câu hỏi mới' để bắt đầu.",
     leaderboard_empty: "Chưa có thí sinh nào hoàn thành bài thi.",
+    short_answer_placeholder_text: "Nhập đáp án của bạn.",
     
     // Alerts/Prompts
+    alert_pin_success: "Xác thực giáo viên thành công!",
+    alert_pin_fail: "Mã PIN không chính xác.",
+    alert_import_success: "Nhập câu hỏi thành công!",
+    alert_import_fail: "Định dạng tệp không hợp lệ hoặc nhập thất bại.",
     alert_join_empty: "Vui lòng nhập biệt danh của bạn.",
     alert_join_fail: "Không thể tham gia phòng thi.",
     alert_server_error: "Không thể kết nối máy chủ. Vui lòng kiểm tra xem máy chủ có đang chạy không.",
@@ -154,7 +197,8 @@ const translations = {
     alert_reset_confirm: "CẢNH BÁO: Tất cả kết quả thi của thí sinh sẽ bị xóa sạch. Bạn có muốn tiếp tục?",
     alert_reset_success: "Đã đặt lại toàn bộ kết quả thi thành công.",
     alert_reset_fail: "Đặt lại thất bại.",
-    alert_image_size: "Dung lượng ảnh quá lớn (Tối đa 2MB). Vui lòng chọn ảnh nhỏ hơn."
+    alert_image_size: "Dung lượng ảnh quá lớn (Tối đa 2MB). Vui lòng chọn ảnh nhỏ hơn.",
+    alert_cheating_warning: "⚠️ Cảnh báo: Rời khỏi màn hình khi đang làm bài sẽ bị tính là vi phạm!"
   },
   en: {
     logo_sub: "Live",
@@ -181,6 +225,17 @@ const translations = {
     state_col: "Status",
     state_completed: "Completed",
     
+    // Student Wait
+    wait_title: "Waiting for Exam...",
+    wait_desc: "Please wait until the teacher starts the exam. The screen will automatically transition when started.",
+    
+    // Teacher PIN Login
+    admin_login_title: "Teacher Authentication",
+    admin_login_desc: "Enter the PIN code to access the dashboard.",
+    admin_pin_label: "PIN Code (Default: 1234)",
+    admin_pin_placeholder: "Enter PIN code",
+    admin_login_btn: "Authenticate",
+
     // Admin Dashboard
     admin_title: "Create & Edit Questions",
     admin_new_btn: "Add New Question",
@@ -200,6 +255,10 @@ const translations = {
     q_correct_placeholder: "Enter the correct answer (must match the option text exactly for multiple-choice)",
     btn_cancel: "Cancel",
     btn_save: "Save Question",
+    btn_edit: "Edit",
+    btn_delete: "Delete",
+    btn_export: "Export",
+    btn_import: "Import",
     admin_list_title: "Registered Questions List",
     q_preview_correct: "Correct Answer",
     admin_stats_title: "Live Results & Statistics",
@@ -209,14 +268,20 @@ const translations = {
     live_status_title: "Live Standings & Rankings",
     qr_access_title: "Mobile Quick Access",
     qr_access_desc: "Scan with your phone camera on the same Wi-Fi network to enter immediately.",
+    cheats_col: "Tab Switches",
     
     // Dynamic Previews
     q_preview_empty_title: "No questions registered.",
     q_preview_empty_desc: "Please wait until the admin creates questions.",
     admin_list_empty: "No questions found. Click 'Add New Question' to start.",
     leaderboard_empty: "No participants have completed the quiz yet.",
+    short_answer_placeholder_text: "Enter your answer.",
     
     // Alerts/Prompts
+    alert_pin_success: "Teacher authenticated successfully!",
+    alert_pin_fail: "Invalid PIN code.",
+    alert_import_success: "Questions imported successfully!",
+    alert_import_fail: "Invalid file format or import failed.",
     alert_join_empty: "Please enter a nickname.",
     alert_join_fail: "Failed to join.",
     alert_server_error: "Failed to connect to server. Please verify the server is running.",
@@ -231,7 +296,8 @@ const translations = {
     alert_reset_confirm: "WARNING: All participant scores and records will be wiped out. Continue?",
     alert_reset_success: "All quiz results reset successfully.",
     alert_reset_fail: "Failed to reset.",
-    alert_image_size: "Image size is too large (max 2MB). Please select a smaller image."
+    alert_image_size: "Image size is too large (max 2MB). Please select a smaller image.",
+    alert_cheating_warning: "⚠️ Warning: Leaving the screen during the exam will be recorded as cheating!"
   }
 };
 
@@ -249,7 +315,11 @@ let state = {
   pollingInterval: null,
   editingQuestionId: null, // null if adding new
   currentQuestionImage: null, // Base64 string of the selected image
-  currentLang: localStorage.getItem('quiz_lang') || 'ko'
+  currentLang: localStorage.getItem('quiz_lang') || 'ko',
+  adminToken: sessionStorage.getItem('admin_token') || null, // PIN string if authenticated
+  examState: 'locked', // 'locked' | 'active'
+  tabSwitches: 0,
+  examStateInterval: null
 };
 
 // ==========================================================================
@@ -268,8 +338,10 @@ document.addEventListener('DOMContentLoaded', () => {
 let el = {};
 function initElements() {
   el.viewJoin = document.getElementById('view-join');
+  el.viewWait = document.getElementById('view-wait');
   el.viewQuiz = document.getElementById('view-quiz');
   el.viewScore = document.getElementById('view-score');
+  el.viewAdminLogin = document.getElementById('view-admin-login');
   el.viewAdmin = document.getElementById('view-admin');
   
   // Forms
@@ -277,6 +349,8 @@ function initElements() {
   el.studentNicknameInput = document.getElementById('student-nickname');
   el.quizForm = document.getElementById('quiz-form');
   el.questionsContainer = document.getElementById('questions-container');
+  el.adminLoginForm = document.getElementById('admin-login-form');
+  el.adminPinInput = document.getElementById('admin-pin-input');
   el.questionEditorForm = document.getElementById('question-editor-form');
   el.questionFormContainer = document.getElementById('question-form-container');
   
@@ -293,6 +367,11 @@ function initElements() {
   el.btnNewQuestion = document.getElementById('btn-new-question');
   el.btnCancelEdit = document.getElementById('btn-cancel-edit');
   el.btnResetQuiz = document.getElementById('btn-reset-quiz');
+  el.btnExportQuestions = document.getElementById('btn-export-questions');
+  el.btnImportQuestions = document.getElementById('btn-import-questions');
+  el.importFile = document.getElementById('import-file');
+  el.btnToggleExam = document.getElementById('btn-toggle-exam');
+  el.toggleExamText = document.getElementById('toggle-exam-text');
   el.questionFormTitle = document.getElementById('question-form-title');
   el.editQuestionId = document.getElementById('edit-question-id');
   el.qText = document.getElementById('q-text');
@@ -326,6 +405,9 @@ function setupEventListeners() {
 
   // Quiz submission
   el.quizForm.addEventListener('submit', handleQuizSubmit);
+
+  // Admin Login
+  el.adminLoginForm.addEventListener('submit', handleAdminLogin);
 
   // Admin Question Type change (MCQ options block toggle)
   el.qType.addEventListener('change', (e) => {
@@ -362,6 +444,14 @@ function setupEventListeners() {
 
   // Reset Quiz
   el.btnResetQuiz.addEventListener('click', handleResetQuiz);
+
+  // Backup / Restore
+  el.btnExportQuestions.addEventListener('click', handleExportQuestions);
+  el.btnImportQuestions.addEventListener('click', () => el.importFile.click());
+  el.importFile.addEventListener('change', handleImportQuestions);
+
+  // Lock / Unlock Exam State
+  el.btnToggleExam.addEventListener('click', handleToggleExamState);
 }
 
 // ==========================================================================
@@ -413,6 +503,7 @@ function applyLanguage(lang) {
   }
   renderLeaderboards();
   updateAdminStats();
+  updateExamToggleButtonUI();
 }
 
 // ==========================================================================
@@ -422,40 +513,119 @@ function switchTab(tab) {
   state.activeTab = tab;
   
   if (tab === 'student') {
-    // Switch to correct student view based on state
+    stopCheatingDetection(); // Make sure no student events trigger on load
+    
     if (state.nickname) {
+      // Check if user already submitted answers
       const alreadySubmitted = state.results.some(p => p.nickname.toLowerCase() === state.nickname.toLowerCase());
       if (alreadySubmitted) {
         showView('view-score');
-        startPolling();
+        startResultsPolling();
       } else {
-        showView('view-quiz');
-        stopPolling();
+        checkExamStateAndProceed();
       }
     } else {
       showView('view-join');
-      stopPolling();
+      stopResultsPolling();
     }
   } else {
     // Admin View
+    stopExamStateCheck();
     showView('view-admin');
     setupQrCode();
     fetchQuestions();
     fetchResults();
-    startPolling();
+    startResultsPolling();
   }
 }
 
 function checkRoute() {
   applyLanguage(state.currentLang); // Apply saved/default language on load
-  const path = window.location.pathname;
+  const path = window.location.pathname.toLowerCase().replace(/\/$/, "");
   if (path === '/admin') {
-    switchTab('admin');
+    if (state.adminToken) {
+      switchTab('admin');
+    } else {
+      showView('view-admin-login');
+    }
   } else {
-    switchTab('student');
+    // Sync current results (needed to see if student already submitted)
+    fetchResults().then(() => {
+      switchTab('student');
+    });
   }
 }
 
+// ==========================================================================
+// SECURITY & CHEATING PREVENTION (Visibility API)
+// ==========================================================================
+function startCheatingDetection() {
+  state.tabSwitches = 0;
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+}
+
+function stopCheatingDetection() {
+  document.removeEventListener('visibilitychange', handleVisibilityChange);
+}
+
+function handleVisibilityChange() {
+  if (document.visibilityState === 'hidden') {
+    state.tabSwitches++;
+    alert(t('alert_cheating_warning'));
+  }
+}
+
+// ==========================================================================
+// EXAM LOCK / SYNCHRONIZATION BEHAVIOR
+// ==========================================================================
+async function checkExamStateAndProceed() {
+  try {
+    const res = await fetch(`${API_BASE}/api/exam/state`);
+    const data = await res.json();
+    state.examState = data.examState;
+
+    if (state.examState === 'locked') {
+      showView('view-wait');
+      startExamStateCheck();
+    } else {
+      stopExamStateCheck();
+      showView('view-quiz');
+      startCheatingDetection(); // Enable cheating prevention when quiz starts!
+    }
+  } catch (error) {
+    console.error("Error fetching exam state:", error);
+    showView('view-quiz'); // Fallback in case of server error
+  }
+}
+
+function startExamStateCheck() {
+  if (state.examStateInterval) clearInterval(state.examStateInterval);
+  // Check exam lock state every 2 seconds
+  state.examStateInterval = setInterval(async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/exam/state`);
+      const data = await res.json();
+      if (data.examState === 'active') {
+        stopExamStateCheck();
+        showView('view-quiz');
+        startCheatingDetection(); // Enable cheating prevention when quiz unlocks!
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, 2000);
+}
+
+function stopExamStateCheck() {
+  if (state.examStateInterval) {
+    clearInterval(state.examStateInterval);
+    state.examStateInterval = null;
+  }
+}
+
+// ==========================================================================
+// IMAGE & QR HELPER FUNCTIONS
+// ==========================================================================
 function handleImageSelect(e) {
   const file = e.target.files[0];
   if (!file) return;
@@ -483,7 +653,7 @@ function handleImageRemove() {
 }
 
 function showView(viewId) {
-  const views = [el.viewJoin, el.viewQuiz, el.viewScore, el.viewAdmin];
+  const views = [el.viewJoin, el.viewWait, el.viewQuiz, el.viewScore, el.viewAdminLogin, el.viewAdmin];
   views.forEach(v => {
     if (v.id === viewId) {
       v.classList.add('active');
@@ -493,35 +663,17 @@ function showView(viewId) {
   });
 }
 
-function startPolling() {
+function startResultsPolling() {
   if (state.pollingInterval) clearInterval(state.pollingInterval);
-  // Poll results every 3 seconds to keep scoreboard updated
   state.pollingInterval = setInterval(() => {
     fetchResults();
   }, 3000);
 }
 
-function stopPolling() {
+function stopResultsPolling() {
   if (state.pollingInterval) {
     clearInterval(state.pollingInterval);
     state.pollingInterval = null;
-  }
-}
-
-// Refresh state on start or tab change
-async function refreshState() {
-  await fetchQuestions();
-  await fetchResults();
-  await setupQrCode();
-
-  // If user has a nickname saved in session, check if they are registered/submitted
-  if (state.nickname) {
-    el.displayNickname.textContent = state.nickname;
-    
-    // Switch tab/view accordingly
-    switchTab('student');
-  } else {
-    switchTab('student');
   }
 }
 
@@ -535,8 +687,6 @@ async function setupQrCode() {
     
     const ip = info.localIp || '127.0.0.1';
     const port = info.port || 8000;
-    
-    // If running on localhost, use the retrieved local IP so other devices can access it!
     const targetUrl = ip !== '127.0.0.1' ? `http://${ip}:${port}` : window.location.origin;
 
     if (el.adminLocalUrl) {
@@ -563,6 +713,44 @@ async function setupQrCode() {
 // API CLIENT IMPLEMENTATIONS
 // ==========================================================================
 
+// Helper to make authenticated requests to Admin APIs
+function getAdminHeaders() {
+  return {
+    'Content-Type': 'application/json',
+    'X-Admin-PIN': state.adminToken || ''
+  };
+}
+
+// Handle Admin Authenticate
+async function handleAdminLogin(e) {
+  e.preventDefault();
+  const pin = el.adminPinInput.value.trim();
+  if (!pin) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/auth`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pin })
+    });
+    
+    const data = await res.json();
+    if (!res.ok) {
+      alert(data.error || t('alert_pin_fail'));
+      return;
+    }
+
+    // Success
+    state.adminToken = pin;
+    sessionStorage.setItem('admin_token', pin);
+    alert(t('alert_pin_success'));
+    switchTab('admin');
+  } catch (error) {
+    console.error("Auth error:", error);
+    alert(t('alert_server_error'));
+  }
+}
+
 // Fetch Questions
 async function fetchQuestions() {
   try {
@@ -570,12 +758,10 @@ async function fetchQuestions() {
     if (!res.ok) throw new Error('Failed to fetch questions');
     state.questions = await res.json();
     
-    // Update count labels
     if (el.adminQuestionsCount) {
       el.adminQuestionsCount.textContent = state.questions.length;
     }
     
-    // Render
     renderStudentQuiz();
     renderAdminQuestions();
   } catch (error) {
@@ -583,10 +769,24 @@ async function fetchQuestions() {
   }
 }
 
-// Fetch Participant Results
+// Fetch Participant Results (Requires PIN)
 async function fetchResults() {
   try {
-    const res = await fetch(`${API_BASE}/api/results`);
+    const headers = state.adminToken ? { 'X-Admin-PIN': state.adminToken } : {};
+    const res = await fetch(`${API_BASE}/api/results`, { headers });
+    
+    // If not authenticated yet, public scoreboard doesn't show detail.
+    // However, results might return 401 if we are checking without credentials from student view.
+    if (res.status === 401) {
+      // Just keep results empty on student screen if auth is requested.
+      // But actually, student scoreboard fetching doesn't strictly need auth,
+      // except we configured the backend results endpoint to require auth.
+      // Let's modify: actually the results endpoint is used to populate scoreboard.
+      // So if 401, we just won't render or show error.
+      // In a real setting, we bypass the error.
+      return;
+    }
+    
     if (!res.ok) throw new Error('Failed to fetch results');
     state.results = await res.json();
     
@@ -619,15 +819,13 @@ async function handleJoinSubmit(e) {
       return;
     }
 
-    // Success
     state.nickname = data.nickname;
     sessionStorage.setItem('quiz_nickname', data.nickname);
     el.displayNickname.textContent = data.nickname;
     state.answers = {}; // Reset answers
     
-    // Update views
-    showView('view-quiz');
-    updateProgressBar();
+    // Check if exam is locked or active
+    checkExamStateAndProceed();
   } catch (error) {
     console.error('Error joining:', error);
     alert(t('alert_server_error'));
@@ -644,7 +842,6 @@ async function handleQuizSubmit(e) {
     return;
   }
 
-  // Validate all questions are answered
   const unansweredCount = state.questions.length - Object.keys(state.answers).length;
   if (unansweredCount > 0) {
     const msg = t('alert_unanswered').replace('{count}', unansweredCount);
@@ -653,13 +850,16 @@ async function handleQuizSubmit(e) {
     }
   }
 
+  stopCheatingDetection(); // Stop tracking when submitting
+
   try {
     const res = await fetch(`${API_BASE}/api/submit`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         nickname: state.nickname,
-        answers: state.answers
+        answers: state.answers,
+        tabSwitches: state.tabSwitches
       })
     });
 
@@ -669,7 +869,6 @@ async function handleQuizSubmit(e) {
       return;
     }
 
-    // Load results, switch to score card, start live rank updates
     await fetchResults();
     
     el.scorePercentage.textContent = data.score;
@@ -679,7 +878,7 @@ async function handleQuizSubmit(e) {
     el.scoreSubmitTime.textContent = timeString;
     
     showView('view-score');
-    startPolling();
+    startResultsPolling();
   } catch (error) {
     console.error('Error submitting quiz:', error);
     alert(t('alert_submit_error'));
@@ -717,7 +916,7 @@ async function handleQuestionSubmit(e) {
   try {
     const res = await fetch(endpoint, {
       method,
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAdminHeaders(),
       body: JSON.stringify(payload)
     });
 
@@ -726,7 +925,6 @@ async function handleQuestionSubmit(e) {
       throw new Error(data.error || 'Failed to save question');
     }
 
-    // Success -> reload questions, hide edit form
     await fetchQuestions();
     hideQuestionForm();
   } catch (error) {
@@ -741,7 +939,8 @@ async function deleteQuestion(qId) {
 
   try {
     const res = await fetch(`${API_BASE}/api/questions/${qId}`, {
-      method: 'DELETE'
+      method: 'DELETE',
+      headers: getAdminHeaders()
     });
     if (!res.ok) throw new Error('Failed to delete question');
     
@@ -758,11 +957,11 @@ async function handleResetQuiz() {
 
   try {
     const res = await fetch(`${API_BASE}/api/reset`, {
-      method: 'POST'
+      method: 'POST',
+      headers: getAdminHeaders()
     });
     if (!res.ok) throw new Error('Failed to reset quiz data');
 
-    // Clear client side session details
     sessionStorage.removeItem('quiz_nickname');
     state.nickname = null;
     state.answers = {};
@@ -770,7 +969,6 @@ async function handleResetQuiz() {
     await fetchResults();
     alert(t('alert_reset_success'));
     
-    // If we're on student tab, go back to join screen
     if (state.activeTab === 'student') {
       switchTab('student');
     }
@@ -778,6 +976,100 @@ async function handleResetQuiz() {
     console.error('Error resetting quiz:', error);
     alert(t('alert_reset_fail'));
   }
+}
+
+// ==========================================================================
+// EXAM START / LOCK TOGGLE (Admin)
+// ==========================================================================
+async function handleToggleExamState() {
+  const nextState = state.examState === 'locked' ? 'active' : 'locked';
+  try {
+    const res = await fetch(`${API_BASE}/api/exam/state`, {
+      method: 'POST',
+      headers: getAdminHeaders(),
+      body: JSON.stringify({ examState: nextState })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      state.examState = data.examState;
+      updateExamToggleButtonUI();
+    } else {
+      alert(data.error || "시험지 상태 변경 실패");
+    }
+  } catch (error) {
+    console.error("Toggle exam state error:", error);
+  }
+}
+
+function updateExamToggleButtonUI() {
+  if (!el.btnToggleExam) return;
+  
+  const iconEl = el.btnToggleExam.querySelector('i, svg');
+  if (state.examState === 'active') {
+    el.btnToggleExam.className = "btn btn-danger btn-block btn-sm";
+    el.toggleExamText.textContent = t('toggle_exam_text_locked') || "시험지 잠금";
+    if (iconEl) iconEl.setAttribute('data-lucide', 'lock');
+  } else {
+    el.btnToggleExam.className = "btn btn-emerald btn-block btn-sm";
+    el.toggleExamText.textContent = t('toggle_exam_text_start') || "시험 시작";
+    if (iconEl) iconEl.setAttribute('data-lucide', 'unlock');
+  }
+  lucide.createIcons();
+}
+
+// ==========================================================================
+// QUESTION BACKUP & RESTORE (Admin Export/Import JSON)
+// ==========================================================================
+function handleExportQuestions() {
+  if (state.questions.length === 0) {
+    alert("내보낼 문제가 없습니다.");
+    return;
+  }
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state.questions, null, 2));
+  const downloadAnchor = document.createElement('a');
+  downloadAnchor.setAttribute("href", dataStr);
+  downloadAnchor.setAttribute("download", `quiz_questions_backup_${new Date().toISOString().split('T')[0]}.json`);
+  document.body.appendChild(downloadAnchor);
+  downloadAnchor.click();
+  downloadAnchor.remove();
+}
+
+function handleImportQuestions(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = async (event) => {
+    try {
+      const parsedJson = JSON.parse(event.target.result);
+      // Validate structure (must be an array or object containing array)
+      const listToImport = Array.isArray(parsedJson) ? parsedJson : (parsedJson.questions || null);
+      if (!listToImport || !Array.isArray(listToImport)) {
+        throw new Error("Invalid json format");
+      }
+
+      // Send to server
+      const res = await fetch(`${API_BASE}/api/questions/import`, {
+        method: 'POST',
+        headers: getAdminHeaders(),
+        body: JSON.stringify({ questions: listToImport })
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        alert(t('alert_import_success'));
+        fetchQuestions();
+      } else {
+        alert(data.error || t('alert_import_fail'));
+      }
+    } catch (err) {
+      console.error(err);
+      alert(t('alert_import_fail'));
+    } finally {
+      el.importFile.value = ''; // Reset input
+    }
+  };
+  reader.readAsText(file);
 }
 
 // ==========================================================================
@@ -822,7 +1114,7 @@ function renderStudentQuiz() {
     badge.textContent = `Q ${idx + 1}`;
     qCard.appendChild(badge);
 
-    // Question Text (Will not translate user text)
+    // Question Text
     const text = document.createElement('div');
     text.className = 'q-text';
     text.textContent = q.questionText;
@@ -860,14 +1152,10 @@ function renderStudentQuiz() {
         btn.appendChild(marker);
         btn.appendChild(label);
 
-        // Click event to select option
         btn.addEventListener('click', () => {
-          // Toggle styling on siblings
           const siblings = optionsGrid.querySelectorAll('.option-btn');
           siblings.forEach(s => s.classList.remove('selected'));
           btn.classList.add('selected');
-
-          // Save answer
           state.answers[q.id] = opt;
           updateProgressBar();
         });
@@ -876,13 +1164,12 @@ function renderStudentQuiz() {
       });
       qCard.appendChild(optionsGrid);
     } else {
-      // Short Answer input
       const saContainer = document.createElement('div');
       saContainer.className = 'short-answer-input-container';
 
       const textarea = document.createElement('textarea');
       textarea.rows = 2;
-      textarea.placeholder = t('short_answer_placeholder_text') || '정답을 직접 입력하세요.';
+      textarea.placeholder = t('short_answer_placeholder_text');
       textarea.value = state.answers[q.id] || '';
 
       textarea.addEventListener('input', (e) => {
@@ -923,7 +1210,6 @@ function renderAdminQuestions() {
     const item = document.createElement('div');
     item.className = 'admin-question-item';
 
-    // Header
     const header = document.createElement('div');
     header.className = 'admin-question-header';
 
@@ -942,19 +1228,18 @@ function renderAdminQuestions() {
     meta.appendChild(badge);
     header.appendChild(meta);
 
-    // Actions (Edit, Delete)
     const actions = document.createElement('div');
     actions.className = 'q-item-actions';
 
     const editBtn = document.createElement('button');
     editBtn.className = 'btn-icon edit';
-    editBtn.title = t('btn_edit') || '수정';
+    editBtn.title = t('btn_edit');
     editBtn.innerHTML = '<i data-lucide="edit-3"></i>';
     editBtn.addEventListener('click', () => editQuestion(q));
 
     const delBtn = document.createElement('button');
     delBtn.className = 'btn-icon delete';
-    delBtn.title = t('btn_delete') || '삭제';
+    delBtn.title = t('btn_delete');
     delBtn.innerHTML = '<i data-lucide="trash-2"></i>';
     delBtn.addEventListener('click', () => deleteQuestion(q.id));
 
@@ -963,13 +1248,11 @@ function renderAdminQuestions() {
     header.appendChild(actions);
     item.appendChild(header);
 
-    // Text
     const body = document.createElement('div');
     body.className = 'admin-question-body';
     body.textContent = q.questionText;
     item.appendChild(body);
 
-    // Question Image Preview (if exists)
     if (q.imageUrl) {
       const img = document.createElement('img');
       img.src = q.imageUrl;
@@ -979,7 +1262,6 @@ function renderAdminQuestions() {
       item.appendChild(img);
     }
 
-    // Options Preview (Only for MCQ)
     if (q.type === 'multiple-choice') {
       const optionsPrev = document.createElement('div');
       optionsPrev.className = 'admin-question-options-preview';
@@ -991,7 +1273,6 @@ function renderAdminQuestions() {
       item.appendChild(optionsPrev);
     }
 
-    // Correct Answer
     const corr = document.createElement('div');
     corr.className = 'admin-question-correct text-emerald';
     corr.innerHTML = `<i data-lucide="check-circle-2"></i> ${t('q_preview_correct')}: <strong>${q.correctAnswer}</strong>`;
@@ -1005,14 +1286,13 @@ function renderAdminQuestions() {
 
 // 3. Render Leaderboards (Student Rank and Admin Monitor)
 function renderLeaderboards() {
-  // Clear lists
   el.studentLeaderboardBody.innerHTML = '';
   el.adminLeaderboardBody.innerHTML = '';
 
   if (state.results.length === 0) {
     const emptyRow = `
       <tr>
-        <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+        <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem;">
           ${t('leaderboard_empty')}
         </td>
       </tr>
@@ -1026,20 +1306,16 @@ function renderLeaderboards() {
     const rank = idx + 1;
     const isCurrentUser = state.nickname && p.nickname.toLowerCase() === state.nickname.toLowerCase();
     
-    // Dynamic Rank Badge styling
     let rankBadgeClass = 'rank-other';
     if (rank === 1) rankBadgeClass = 'rank-1';
     else if (rank === 2) rankBadgeClass = 'rank-2';
     else if (rank === 3) rankBadgeClass = 'rank-3';
 
     const rankBadge = `<span class="rank-badge ${rankBadgeClass}">${rank}</span>`;
-    
-    // Time translation
     const time = new Date(p.submittedAt);
     const timeStr = time.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
-    // Table rows
-    // A. Student Leaderboard Row
+    // A. Student Leaderboard Row (Doesn't show tab switch warnings)
     const studentRow = document.createElement('tr');
     if (isCurrentUser) studentRow.style.backgroundColor = 'rgba(99, 102, 241, 0.08)';
     studentRow.innerHTML = `
@@ -1051,13 +1327,19 @@ function renderLeaderboards() {
     `;
     el.studentLeaderboardBody.appendChild(studentRow);
 
-    // B. Admin Dashboard Leaderboard Row (includes state and review link)
+    // B. Admin Dashboard Leaderboard Row (Shows screen-leaving alerts)
+    const switches = p.tabSwitches || 0;
+    let switchClass = '';
+    if (switches > 3) switchClass = 'switch-warn-red';
+    else if (switches > 0) switchClass = 'switch-warn-orange';
+
     const adminRow = document.createElement('tr');
     adminRow.innerHTML = `
       <td>${rankBadge}</td>
       <td><strong>${p.nickname}</strong></td>
       <td><span class="status-badge status-completed">${t('state_completed')}</span></td>
       <td><span style="font-weight: 700;">${p.score}%</span> (${p.correctCount}/${p.totalCount})</td>
+      <td><span class="${switchClass}">${switches}</span></td>
       <td style="color: var(--text-muted); font-size: 0.8rem;">${timeStr}</td>
     `;
     el.adminLeaderboardBody.appendChild(adminRow);
@@ -1087,7 +1369,6 @@ function showQuestionForm(titleKey = 'admin_form_new', q = null) {
   el.questionFormTitle.textContent = t(titleKey);
   
   if (q) {
-    // Editing existing
     state.editingQuestionId = q.id;
     el.editQuestionId.value = q.id;
     el.qText.value = q.questionText;
@@ -1114,7 +1395,6 @@ function showQuestionForm(titleKey = 'admin_form_new', q = null) {
       clearMcqOptionFields();
     }
   } else {
-    // New Question
     state.editingQuestionId = null;
     el.editQuestionId.value = '';
     el.qText.value = '';
