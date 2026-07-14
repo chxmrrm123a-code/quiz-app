@@ -141,8 +141,6 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
             return
         
         elif path == '/api/results':
-            if not self.check_admin_auth():
-                return
             if not room_code:
                 self.send_error_response(400, "방 번호(roomCode)가 필요합니다.")
                 return
@@ -153,18 +151,40 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
                 self.send_json_response(200, [])
                 return
 
+            auth_pin = self.headers.get('X-Admin-PIN', '')
+            correct_pin = os.environ.get('ADMIN_PIN', '1234')
+            is_admin = (auth_pin == correct_pin)
+
             participants = room.get("participants", [])
-            results = [p for p in participants if p.get("score") is not None]
             
-            # Sort by score desc, then by speed (submittedAt asc)
+            # Filter and sanitize results based on admin role
+            results = []
+            for p in participants:
+                if is_admin:
+                    # Admin sees everything (including in-progress and tab switches)
+                    results.append(p)
+                elif p.get("score") is not None:
+                    # Students only see completed participants without answers/cheating details
+                    results.append({
+                        "nickname": p["nickname"],
+                        "score": p["score"],
+                        "correctCount": p["correctCount"],
+                        "totalCount": p["totalCount"],
+                        "submittedAt": p["submittedAt"]
+                    })
+            
+            # Sort by completion (completed first), then by score desc, then by speed (submittedAt asc)
             def get_sort_key(p):
-                score = p.get("score", 0)
-                sub_time = p.get("submittedAt", "")
-                try:
-                    ts = datetime.fromisoformat(sub_time.replace("Z", "+00:00")).timestamp()
-                except Exception:
-                    ts = 9999999999
-                return (-score, ts)
+                score = p.get("score")
+                if score is not None:
+                    sub_time = p.get("submittedAt", "")
+                    try:
+                        ts = datetime.fromisoformat(sub_time.replace("Z", "+00:00")).timestamp()
+                    except Exception:
+                        ts = 9999999999
+                    return (0, -score, ts)
+                else:
+                    return (1, 0, p.get("nickname", "").lower())
             
             results.sort(key=get_sort_key)
             self.send_json_response(200, results)
@@ -244,6 +264,35 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
             write_db(db)
 
             self.send_json_response(201, {"success": True, "roomCode": room_code})
+            return
+
+        # Record screen switch (Student)
+        elif path == '/api/tabswitch':
+            nickname = body.get('nickname', '').strip()
+            room_code = str(body.get('roomCode', '')).strip()
+            tab_switches = int(body.get('tabSwitches', 0))
+
+            if not nickname or not room_code:
+                self.send_error_response(400, "Nickname and roomCode are required")
+                return
+
+            db = read_db()
+            rooms = db.get("rooms", {})
+            if room_code not in rooms:
+                self.send_error_response(404, "Room not found")
+                return
+
+            participants = rooms[room_code].get("participants", [])
+            user_idx = next((i for i, p in enumerate(participants) if p["nickname"].lower() == nickname.lower()), -1)
+            
+            if user_idx == -1:
+                self.send_error_response(404, "Participant not found")
+                return
+
+            db["rooms"][room_code]["participants"][user_idx]["tabSwitches"] = tab_switches
+            write_db(db)
+
+            self.send_json_response(200, {"success": True, "tabSwitches": tab_switches})
             return
 
         # Join as participant (Student)

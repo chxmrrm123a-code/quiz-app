@@ -669,6 +669,17 @@ function stopCheatingDetection() {
 function handleVisibilityChange() {
   if (document.visibilityState === 'hidden') {
     state.tabSwitches++;
+    // Send to server in real-time
+    fetch(`${API_BASE}/api/tabswitch`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nickname: state.nickname,
+        roomCode: state.roomCode,
+        tabSwitches: state.tabSwitches
+      })
+    }).catch(err => console.error("Error reporting tab switch:", err));
+    
     alert(t('alert_cheating_warning'));
   }
 }
@@ -1467,43 +1478,80 @@ function renderLeaderboards() {
     return;
   }
 
+  // Filter completed participants for the student scoreboard
+  const completedResults = state.results.filter(p => p.score !== null);
+  
+  if (completedResults.length === 0) {
+    el.studentLeaderboardBody.innerHTML = `
+      <tr>
+        <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+          ${t('leaderboard_empty')}
+        </td>
+      </tr>
+    `;
+  } else {
+    completedResults.forEach((p, idx) => {
+      const rank = idx + 1;
+      const isCurrentUser = state.nickname && p.nickname.toLowerCase() === state.nickname.toLowerCase();
+      
+      let rankBadgeClass = 'rank-other';
+      if (rank === 1) rankBadgeClass = 'rank-1';
+      else if (rank === 2) rankBadgeClass = 'rank-2';
+      else if (rank === 3) rankBadgeClass = 'rank-3';
+
+      const rankBadge = `<span class="rank-badge ${rankBadgeClass}">${rank}</span>`;
+      const time = new Date(p.submittedAt);
+      const timeStr = time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+      const studentRow = document.createElement('tr');
+      if (isCurrentUser) studentRow.style.backgroundColor = 'rgba(99, 102, 241, 0.08)';
+      studentRow.innerHTML = `
+        <td>${rankBadge}</td>
+        <td><strong>${p.nickname}</strong> ${isCurrentUser ? `<span class="text-gold">(${state.currentLang === 'ko' ? '나' : (state.currentLang === 'vi' ? 'Tôi' : 'You')})</span>` : ''}</td>
+        <td>${p.correctCount} / ${p.totalCount}</td>
+        <td><span class="text-emerald" style="font-weight: 800;">${p.score}${t('score_label')}</span></td>
+        <td style="color: var(--text-muted); font-size: 0.8rem;">${timeStr}</td>
+      `;
+      el.studentLeaderboardBody.appendChild(studentRow);
+    });
+  }
+
+  // Admin Dashboard displays all participants (completed and in-progress)
   state.results.forEach((p, idx) => {
     const rank = idx + 1;
-    const isCurrentUser = state.nickname && p.nickname.toLowerCase() === state.nickname.toLowerCase();
-    
     let rankBadgeClass = 'rank-other';
     if (rank === 1) rankBadgeClass = 'rank-1';
     else if (rank === 2) rankBadgeClass = 'rank-2';
     else if (rank === 3) rankBadgeClass = 'rank-3';
 
     const rankBadge = `<span class="rank-badge ${rankBadgeClass}">${rank}</span>`;
-    const time = new Date(p.submittedAt);
-    const timeStr = time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    
+    const isCompleted = p.score !== null;
+    let timeStr = '-';
+    if (isCompleted && p.submittedAt) {
+      const time = new Date(p.submittedAt);
+      timeStr = time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    }
 
-    // A. Student Leaderboard Row (Doesn't show tab switch warnings)
-    const studentRow = document.createElement('tr');
-    if (isCurrentUser) studentRow.style.backgroundColor = 'rgba(99, 102, 241, 0.08)';
-    studentRow.innerHTML = `
-      <td>${rankBadge}</td>
-      <td><strong>${p.nickname}</strong> ${isCurrentUser ? '<span class="text-gold">(You)</span>' : ''}</td>
-      <td>${p.correctCount} / ${p.totalCount}</td>
-      <td><span class="text-emerald" style="font-weight: 800;">${p.score}${t('score_label')}</span></td>
-      <td style="color: var(--text-muted); font-size: 0.8rem;">${timeStr}</td>
-    `;
-    el.studentLeaderboardBody.appendChild(studentRow);
-
-    // B. Admin Dashboard Leaderboard Row (Shows screen-leaving alerts)
     const switches = p.tabSwitches || 0;
     let switchClass = '';
     if (switches > 3) switchClass = 'switch-warn-red';
     else if (switches > 0) switchClass = 'switch-warn-orange';
 
+    const statusBadge = isCompleted 
+      ? `<span class="status-badge status-completed">${t('state_completed')}</span>`
+      : `<span class="status-badge status-pending" style="background: rgba(99, 102, 241, 0.1); color: var(--primary); padding: 0.2rem 0.5rem; border-radius: var(--radius-sm); font-size: 0.75rem; border: 1px solid rgba(99, 102, 241, 0.2); font-weight: 600;">${state.currentLang === 'ko' ? '진행 중' : (state.currentLang === 'vi' ? 'Đang thi' : 'In Progress')}</span>`;
+
+    const scoreText = isCompleted
+      ? `<span style="font-weight: 700;">${p.score}%</span> (${p.correctCount}/${p.totalCount})`
+      : `-`;
+
     const adminRow = document.createElement('tr');
     adminRow.innerHTML = `
       <td>${rankBadge}</td>
       <td><strong>${p.nickname}</strong></td>
-      <td><span class="status-badge status-completed">${t('state_completed')}</span></td>
-      <td><span style="font-weight: 700;">${p.score}%</span> (${p.correctCount}/${p.totalCount})</td>
+      <td>${statusBadge}</td>
+      <td>${scoreText}</td>
       <td><span class="${switchClass}">${switches}</span></td>
       <td style="color: var(--text-muted); font-size: 0.8rem;">${timeStr}</td>
     `;
