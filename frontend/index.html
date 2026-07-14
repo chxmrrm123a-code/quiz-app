@@ -34,14 +34,7 @@
         <i data-lucide="zap" class="logo-icon"></i>
         <h1>Qurious <span class="badge">Live</span></h1>
       </div>
-      <nav class="nav-tabs">
-        <button id="tab-student" class="nav-tab active">
-          <i data-lucide="user"></i> 학생 퀴즈 참가
-        </button>
-        <button id="tab-admin" class="nav-tab">
-          <i data-lucide="shield-check"></i> 관리자 대시보드
-        </button>
-      </nav>
+      <!-- Tabs removed to separate Student and Teacher views -->
     </header>
 
     <!-- Main Content Area -->
@@ -179,6 +172,19 @@
               <div class="input-group">
                 <label for="q-text">질문 내용</label>
                 <textarea id="q-text" rows="3" placeholder="질문을 입력하세요" required></textarea>
+              </div>
+
+              <div class="input-group">
+                <label for="q-image-file">문제 이미지 (선택사항)</label>
+                <input type="file" id="q-image-file" accept="image/*">
+                
+                <!-- Preview container -->
+                <div id="q-image-preview-container" class="image-upload-preview hidden">
+                  <img id="q-image-preview" src="" alt="Image preview">
+                  <button type="button" id="btn-remove-image" class="btn-remove-img" title="이미지 삭제">
+                    <i data-lucide="x" style="width: 14px; height: 14px;"></i>
+                  </button>
+                </div>
               </div>
 
               <div class="input-group">

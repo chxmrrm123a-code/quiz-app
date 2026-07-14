@@ -10,7 +10,8 @@ let state = {
   answers: {}, // { questionId: answerText }
   results: [],
   pollingInterval: null,
-  editingQuestionId: null // null if adding new
+  editingQuestionId: null, // null if adding new
+  currentQuestionImage: null // Base64 string of the selected image
 };
 
 // ==========================================================================
@@ -19,7 +20,7 @@ let state = {
 document.addEventListener('DOMContentLoaded', () => {
   initElements();
   setupEventListeners();
-  refreshState();
+  checkRoute();
   
   // Initialize Lucide Icons
   lucide.createIcons();
@@ -28,8 +29,6 @@ document.addEventListener('DOMContentLoaded', () => {
 // Cache DOM elements
 let el = {};
 function initElements() {
-  el.tabStudent = document.getElementById('tab-student');
-  el.tabAdmin = document.getElementById('tab-admin');
   el.viewJoin = document.getElementById('view-join');
   el.viewQuiz = document.getElementById('view-quiz');
   el.viewScore = document.getElementById('view-score');
@@ -69,16 +68,18 @@ function initElements() {
   el.statAvgScore = document.getElementById('stat-avg-score');
   el.adminQrCode = document.getElementById('admin-qr-code');
   el.adminLocalUrl = document.getElementById('admin-local-url');
+  
+  // Image Upload elements
+  el.qImageFile = document.getElementById('q-image-file');
+  el.qImagePreviewContainer = document.getElementById('q-image-preview-container');
+  el.qImagePreview = document.getElementById('q-image-preview');
+  el.btnRemoveImage = document.getElementById('btn-remove-image');
 }
 
 // ==========================================================================
 // EVENT LISTENERS
 // ==========================================================================
 function setupEventListeners() {
-  // Tab switching
-  el.tabStudent.addEventListener('click', () => switchTab('student'));
-  el.tabAdmin.addEventListener('click', () => switchTab('admin'));
-
   // Student Nickname Join
   el.joinForm.addEventListener('submit', handleJoinSubmit);
 
@@ -95,6 +96,14 @@ function setupEventListeners() {
       toggleMcqOptionsRequired(false);
     }
   });
+
+  // Image Upload Handling
+  if (el.qImageFile) {
+    el.qImageFile.addEventListener('change', handleImageSelect);
+  }
+  if (el.btnRemoveImage) {
+    el.btnRemoveImage.addEventListener('click', handleImageRemove);
+  }
 
   // Admin Add New/Edit Questions Toggle
   el.btnNewQuestion.addEventListener('click', () => showQuestionForm());
@@ -114,13 +123,8 @@ function switchTab(tab) {
   state.activeTab = tab;
   
   if (tab === 'student') {
-    el.tabStudent.classList.add('active');
-    el.tabAdmin.classList.remove('active');
-    el.viewAdmin.classList.remove('active');
-    
     // Switch to correct student view based on state
     if (state.nickname) {
-      // Check if user already submitted answers
       const alreadySubmitted = state.results.some(p => p.nickname.toLowerCase() === state.nickname.toLowerCase());
       if (alreadySubmitted) {
         showView('view-score');
@@ -134,16 +138,47 @@ function switchTab(tab) {
       stopPolling();
     }
   } else {
-    // Admin Tab
-    el.tabStudent.classList.remove('active');
-    el.tabAdmin.classList.add('active');
+    // Admin View
     showView('view-admin');
-    
-    // Load fresh data for admin panel and start polling
     fetchQuestions();
     fetchResults();
     startPolling();
   }
+}
+
+function checkRoute() {
+  const path = window.location.pathname;
+  if (path === '/admin') {
+    switchTab('admin');
+  } else {
+    switchTab('student');
+  }
+}
+
+function handleImageSelect(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  if (file.size > 2 * 1024 * 1024) {
+    alert("이미지 용량이 너무 큽니다 (최대 2MB). 더 작은 이미지를 사용해 주세요.");
+    el.qImageFile.value = '';
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    state.currentQuestionImage = event.target.result;
+    el.qImagePreview.src = state.currentQuestionImage;
+    el.qImagePreviewContainer.classList.remove('hidden');
+  };
+  reader.readAsDataURL(file);
+}
+
+function handleImageRemove() {
+  state.currentQuestionImage = null;
+  if (el.qImageFile) el.qImageFile.value = '';
+  if (el.qImagePreview) el.qImagePreview.src = '';
+  if (el.qImagePreviewContainer) el.qImagePreviewContainer.classList.add('hidden');
 }
 
 function showView(viewId) {
@@ -368,7 +403,7 @@ async function handleQuestionSubmit(e) {
     }
   }
 
-  const payload = { type, questionText, correctAnswer, options };
+  const payload = { type, questionText, correctAnswer, options, imageUrl: state.currentQuestionImage };
   const method = state.editingQuestionId ? 'PUT' : 'POST';
   const endpoint = state.editingQuestionId 
     ? `${API_BASE}/api/questions/${state.editingQuestionId}`
@@ -487,6 +522,15 @@ function renderStudentQuiz() {
     text.className = 'q-text';
     text.textContent = q.questionText;
     qCard.appendChild(text);
+
+    // Question Image (if exists)
+    if (q.imageUrl) {
+      const img = document.createElement('img');
+      img.src = q.imageUrl;
+      img.className = 'question-image';
+      img.alt = `문제 ${idx + 1} 이미지`;
+      qCard.appendChild(img);
+    }
 
     // Options or Subjective Input
     if (q.type === 'multiple-choice') {
@@ -620,6 +664,16 @@ function renderAdminQuestions() {
     body.textContent = q.questionText;
     item.appendChild(body);
 
+    // Question Image Preview (if exists)
+    if (q.imageUrl) {
+      const img = document.createElement('img');
+      img.src = q.imageUrl;
+      img.className = 'question-image';
+      img.style.maxHeight = '120px';
+      img.alt = 'Question Image';
+      item.appendChild(img);
+    }
+
     // Options Preview (Only for MCQ)
     if (q.type === 'multiple-choice') {
       const optionsPrev = document.createElement('div');
@@ -735,6 +789,14 @@ function showQuestionForm(title = '새 문제 추가', q = null) {
     el.qType.value = q.type;
     el.qCorrect.value = q.correctAnswer;
     
+    if (q.imageUrl) {
+      state.currentQuestionImage = q.imageUrl;
+      el.qImagePreview.src = q.imageUrl;
+      el.qImagePreviewContainer.classList.remove('hidden');
+    } else {
+      handleImageRemove();
+    }
+
     if (q.type === 'multiple-choice') {
       el.mcqOptionsContainer.classList.remove('hidden');
       toggleMcqOptionsRequired(true);
@@ -753,6 +815,7 @@ function showQuestionForm(title = '새 문제 추가', q = null) {
     el.qText.value = '';
     el.qType.value = 'multiple-choice';
     el.qCorrect.value = '';
+    handleImageRemove();
     
     el.mcqOptionsContainer.classList.remove('hidden');
     toggleMcqOptionsRequired(true);
@@ -763,6 +826,7 @@ function showQuestionForm(title = '새 문제 추가', q = null) {
 function hideQuestionForm() {
   el.questionFormContainer.classList.add('hidden');
   el.questionEditorForm.reset();
+  handleImageRemove();
   state.editingQuestionId = null;
 }
 
