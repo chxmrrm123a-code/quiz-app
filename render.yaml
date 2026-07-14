@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: qurious-quiz
+    runtime: python
+    plan: free
+    # 이 앱은 파이썬 표준 라이브러리만 사용하므로 별도 설치가 필요 없습니다.
+    buildCommand: "pip install --upgrade pip"
+    startCommand: "python backend/server.py"
+    # 관리자 PIN은 코드 기본값(1234)을 사용합니다.
+    # 나중에 변경하려면 Render 대시보드 > Environment 에서
+    # ADMIN_PIN 환경변수를 추가하면 됩니다.
