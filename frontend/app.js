@@ -778,17 +778,26 @@ let qrCodeInstance = null;
 
 async function setupQrCode() {
   try {
-    const res = await fetch(`${API_BASE}/api/info`);
-    if (!res.ok) throw new Error('Failed to fetch API info');
-    const info = await res.json();
+    const hostname = window.location.hostname;
+    const isLocal = hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.') || hostname.startsWith('10.') || hostname.startsWith('172.');
     
-    const ip = info.localIp || '127.0.0.1';
-    const port = info.port || 8000;
+    let targetUrl = `${window.location.origin}/?room=${state.roomCode}`;
     
-    // Scan links directly bind to the specific room code!
-    const targetUrl = ip !== '127.0.0.1' 
-      ? `http://${ip}:${port}/?room=${state.roomCode}` 
-      : `${window.location.origin}/?room=${state.roomCode}`;
+    if (isLocal) {
+      try {
+        const res = await fetch(`${API_BASE}/api/info`);
+        if (res.ok) {
+          const info = await res.json();
+          const ip = info.localIp || '127.0.0.1';
+          const port = info.port || 8000;
+          if (ip !== '127.0.0.1') {
+            targetUrl = `http://${ip}:${port}/?room=${state.roomCode}`;
+          }
+        }
+      } catch (e) {
+        console.error("Local IP fetch failed, falling back to window.location.origin", e);
+      }
+    }
 
     if (el.adminLocalUrl) {
       el.adminLocalUrl.textContent = targetUrl;
