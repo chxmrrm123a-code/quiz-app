@@ -31,33 +31,6 @@
       "correctAnswer": "Class"
     }
   ],
-  "participants": [
-    {
-      "nickname": "ㄴ",
-      "score": null,
-      "correctCount": null,
-      "totalCount": null,
-      "submittedAt": null,
-      "answers": {}
-    },
-    {
-      "nickname": "1234",
-      "score": null,
-      "correctCount": null,
-      "totalCount": null,
-      "submittedAt": null,
-      "answers": {},
-      "tabSwitches": 0
-    },
-    {
-      "nickname": "12345",
-      "score": null,
-      "correctCount": null,
-      "totalCount": null,
-      "submittedAt": null,
-      "answers": {},
-      "tabSwitches": 0
-    }
-  ],
+  "participants": [],
   "examState": "locked"
 }

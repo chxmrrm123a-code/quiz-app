@@ -52,7 +52,7 @@ const translations = {
     q_type_sa_short: "주관식",
     q_image_label: "문제 이미지 (선택사항)",
     q_image_preview_alt: "이미지 미리보기",
-    q_options_label: "보기 설정 (4지선다)",
+    q_options_label: "보기 설정 (4지선다 혹은 5지선다)",
     q_correct_label: "정답",
     q_correct_placeholder: "정답을 입력하세요 (객관식은 보기 텍스트와 완벽히 일치해야 함)",
     btn_cancel: "취소",
@@ -91,7 +91,7 @@ const translations = {
     alert_unanswered: "아직 풀지 않은 문제가 {count}개 있습니다. 이대로 제출할까요?",
     alert_submit_fail: "제출에 실패했습니다.",
     alert_submit_error: "서버 제출 도중 오류가 발생했습니다.",
-    alert_mcq_options_empty: "객관식 보기 4개를 모두 채워주세요.",
+    alert_mcq_options_empty: "객관식 보기 4개를 모두 채워주세요. (5번은 선택사항)",
     alert_question_save_error: "문제를 저장하는 도중 오류가 발생했습니다.",
     alert_question_delete_confirm: "정말로 이 문제를 삭제하시겠습니까?",
     alert_question_delete_fail: "문제 삭제에 실패했습니다.",
@@ -99,7 +99,9 @@ const translations = {
     alert_reset_success: "모든 응시 결과가 성공적으로 초기화되었습니다.",
     alert_reset_fail: "초기화에 실패했습니다.",
     alert_image_size: "이미지 용량이 너무 큽니다 (최대 2MB). 더 작은 이미지를 사용해 주세요.",
-    alert_cheating_warning: "⚠️ 경고: 시험 중에 화면을 벗어나면 부정행위로 간주되어 기록에 남습니다!"
+    alert_cheating_warning: "⚠️ 경고: 시험 중에 화면을 벗어나면 부정행위로 간주되어 기록에 남습니다!",
+    toggle_exam_text_start: "시험 시작",
+    toggle_exam_text_locked: "시험지 잠금"
   },
   vi: {
     logo_sub: "Trực tiếp",
@@ -151,7 +153,7 @@ const translations = {
     q_type_sa_short: "Tự luận",
     q_image_label: "Hình ảnh câu hỏi (Tùy chọn)",
     q_image_preview_alt: "Xem trước hình ảnh",
-    q_options_label: "Cấu hình lựa chọn (Trắc nghiệm)",
+    q_options_label: "Cấu hình lựa chọn (4 hoặc 5 lựa chọn)",
     q_correct_label: "Đáp án đúng",
     q_correct_placeholder: "Nhập đáp án đúng (Với trắc nghiệm phải khớp chính xác với văn bản lựa chọn)",
     btn_cancel: "Hủy bỏ",
@@ -190,7 +192,7 @@ const translations = {
     alert_unanswered: "Bạn còn {count} câu hỏi chưa trả lời. Bạn vẫn muốn nộp bài chứ?",
     alert_submit_fail: "Nộp bài thất bại.",
     alert_submit_error: "Đã xảy ra lỗi khi nộp bài lên máy chủ.",
-    alert_mcq_options_empty: "Vui lòng điền đầy đủ cả 4 lựa chọn trắc nghiệm.",
+    alert_mcq_options_empty: "Vui lòng điền đầy đủ ít nhất 4 lựa chọn trắc nghiệm (Lựa chọn 5 không bắt buộc).",
     alert_question_save_error: "Đã xảy ra lỗi khi lưu câu hỏi.",
     alert_question_delete_confirm: "Bạn có chắc chắn muốn xóa câu hỏi này không?",
     alert_question_delete_fail: "Xóa câu hỏi thất bại.",
@@ -198,7 +200,9 @@ const translations = {
     alert_reset_success: "Đã đặt lại toàn bộ kết quả thi thành công.",
     alert_reset_fail: "Đặt lại thất bại.",
     alert_image_size: "Dung lượng ảnh quá lớn (Tối đa 2MB). Vui lòng chọn ảnh nhỏ hơn.",
-    alert_cheating_warning: "⚠️ Cảnh báo: Rời khỏi màn hình khi đang làm bài sẽ bị tính là vi phạm!"
+    alert_cheating_warning: "⚠️ Cảnh báo: Rời khỏi màn hình khi đang làm bài sẽ bị tính là vi phạm!",
+    toggle_exam_text_start: "Bắt đầu thi",
+    toggle_exam_text_locked: "Khóa đề thi"
   },
   en: {
     logo_sub: "Live",
@@ -250,7 +254,7 @@ const translations = {
     q_type_sa_short: "Short Answer",
     q_image_label: "Question Image (Optional)",
     q_image_preview_alt: "Image Preview",
-    q_options_label: "Multiple Choice Options (4 Choices)",
+    q_options_label: "Multiple Choice Options (4 or 5 Choices)",
     q_correct_label: "Correct Answer",
     q_correct_placeholder: "Enter the correct answer (must match the option text exactly for multiple-choice)",
     btn_cancel: "Cancel",
@@ -289,7 +293,7 @@ const translations = {
     alert_unanswered: "You have {count} unanswered questions. Submit anyway?",
     alert_submit_fail: "Failed to submit answers.",
     alert_submit_error: "Error occurred during submission.",
-    alert_mcq_options_empty: "Please fill out all 4 multiple-choice options.",
+    alert_mcq_options_empty: "Please fill out at least 4 multiple-choice options (5th option is optional).",
     alert_question_save_error: "Error occurred while saving question.",
     alert_question_delete_confirm: "Are you sure you want to delete this question?",
     alert_question_delete_fail: "Failed to delete question.",
@@ -297,7 +301,9 @@ const translations = {
     alert_reset_success: "All quiz results reset successfully.",
     alert_reset_fail: "Failed to reset.",
     alert_image_size: "Image size is too large (max 2MB). Please select a smaller image.",
-    alert_cheating_warning: "⚠️ Warning: Leaving the screen during the exam will be recorded as cheating!"
+    alert_cheating_warning: "⚠️ Warning: Leaving the screen during the exam will be recorded as cheating!",
+    toggle_exam_text_start: "Start Exam",
+    toggle_exam_text_locked: "Lock Exam"
   }
 };
 
@@ -905,6 +911,10 @@ async function handleQuestionSubmit(e) {
       alert(t('alert_mcq_options_empty'));
       return;
     }
+    const opt5 = document.getElementById('opt-4').value.trim();
+    if (opt5) {
+      options.push(opt5);
+    }
   }
 
   const payload = { type, questionText, correctAnswer, options, imageUrl: state.currentQuestionImage };
@@ -1387,8 +1397,14 @@ function showQuestionForm(titleKey = 'admin_form_new', q = null) {
       el.mcqOptionsContainer.classList.remove('hidden');
       toggleMcqOptionsRequired(true);
       q.options.forEach((opt, idx) => {
-        document.getElementById(`opt-${idx}`).value = opt;
+        const optInput = document.getElementById(`opt-${idx}`);
+        if (optInput) optInput.value = opt;
       });
+      // If editing a 4-choice question, ensure Option 5 input is cleared
+      if (q.options.length < 5) {
+        const opt4 = document.getElementById('opt-4');
+        if (opt4) opt4.value = '';
+      }
     } else {
       el.mcqOptionsContainer.classList.add('hidden');
       toggleMcqOptionsRequired(false);
@@ -1415,18 +1431,22 @@ function hideQuestionForm() {
   state.editingQuestionId = null;
 }
 
+// Edit existing question
 function editQuestion(q) {
   showQuestionForm('admin_form_edit', q);
 }
 
 function clearMcqOptionFields() {
-  for (let i = 0; i < 4; i++) {
-    document.getElementById(`opt-${i}`).value = '';
+  for (let i = 0; i < 5; i++) {
+    const elOpt = document.getElementById(`opt-${i}`);
+    if (elOpt) elOpt.value = '';
   }
 }
 
 function toggleMcqOptionsRequired(isRequired) {
+  // Only option fields 1 to 4 are strictly required for multiple choice.
   for (let i = 0; i < 4; i++) {
-    document.getElementById(`opt-${i}`).required = isRequired;
+    const elOpt = document.getElementById(`opt-${i}`);
+    if (elOpt) elOpt.required = isRequired;
   }
 }
