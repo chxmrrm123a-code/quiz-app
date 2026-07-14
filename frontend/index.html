@@ -111,6 +111,11 @@
           </div>
         </div>
 
+        <!-- Timer countdown banner -->
+        <div id="quiz-timer-banner" class="timer-banner hidden" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); padding: 0.8rem; border-radius: var(--radius-md); margin-bottom: 1rem; display: flex; justify-content: center; align-items: center; gap: 0.5rem; font-weight: bold; color: #f87171; font-size: 1.1rem; box-shadow: var(--shadow-sm);">
+          <i data-lucide="timer"></i> <span data-i18n="timer_label">남은 시간:</span> <span id="timer-countdown">00:00</span>
+        </div>
+
         <!-- Questions List Container -->
         <form id="quiz-form">
           <div id="questions-container" class="questions-list">
@@ -353,7 +358,7 @@
             </div>
           </div>
 
-          <div class="admin-stats-summary" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="admin-stats-summary" style="grid-template-columns: repeat(4, 1fr); gap: 0.8rem;">
             <div class="stat-box">
               <span id="stat-total-players" class="stat-num">0</span>
               <span class="stat-label" data-i18n="stat_players_label">참가자 수</span>
@@ -362,8 +367,12 @@
               <span id="stat-avg-score" class="stat-num">0%</span>
               <span class="stat-label" data-i18n="stat_avg_label">평균 점수</span>
             </div>
+            <div class="stat-box" style="display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 0.5rem; gap: 0.3rem;">
+              <label for="admin-timer-input" style="font-size: 0.72rem; color: var(--text-muted); font-weight: bold; text-align: center;">제한 시간(분)</label>
+              <input type="number" id="admin-timer-input" min="0" max="180" value="0" style="width: 70px; text-align: center; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); color: var(--text-light); border-radius: var(--radius-sm); height: 28px; font-size: 0.85rem;" placeholder="무제한">
+            </div>
             <div class="stat-box" style="padding: 0.6rem; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-              <button id="btn-toggle-exam" class="btn btn-primary btn-block btn-sm" style="font-size: 0.8rem; padding: 0.5rem 0.8rem; height: 100%;">
+              <button id="btn-toggle-exam" class="btn btn-primary btn-block btn-sm" style="font-size: 0.8rem; padding: 0.5rem 0.8rem; height: 100%; display: flex; align-items: center; justify-content: center; gap: 0.3rem;">
                 <i data-lucide="lock" style="width: 14px; height: 14px;"></i> <span id="toggle-exam-text">시험지 잠금</span>
               </button>
             </div>

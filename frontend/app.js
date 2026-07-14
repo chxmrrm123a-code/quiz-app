@@ -39,6 +39,7 @@ const translations = {
     // Student Wait
     wait_title: "시험 대기 중...",
     wait_desc: "선생님이 시험을 시작하실 때까지 대기해 주세요. 시작 시 자동으로 화면이 전환됩니다.",
+    timer_label: "남은 시간:",
     
     // Teacher PIN Login
     admin_login_title: "선생님(관리자) 인증",
@@ -154,6 +155,7 @@ const translations = {
     // Student Wait
     wait_title: "Đang chờ thi...",
     wait_desc: "Vui lòng đợi giáo viên bắt đầu bài thi. Màn hình sẽ tự động chuyển khi bắt đầu.",
+    timer_label: "Thời gian còn lại:",
     
     // Teacher PIN Login
     admin_login_title: "Xác thực Giáo viên",
@@ -269,6 +271,7 @@ const translations = {
     // Student Wait
     wait_title: "Waiting for Exam...",
     wait_desc: "Please wait until the teacher starts the exam. The screen will automatically transition when started.",
+    timer_label: "Time Remaining:",
     
     // Teacher PIN Login
     admin_login_title: "Teacher Authentication",
@@ -403,6 +406,10 @@ function initElements() {
   
   el.adminLoginForm = document.getElementById('admin-login-form');
   el.adminPinInput = document.getElementById('admin-pin-input');
+  
+  el.adminTimerInput = document.getElementById('admin-timer-input');
+  el.quizTimerBanner = document.getElementById('quiz-timer-banner');
+  el.timerCountdown = document.getElementById('timer-countdown');
   
   el.btnCreateRoom = document.getElementById('btn-create-room');
   el.adminRoomEnterForm = document.getElementById('admin-room-enter-form');
@@ -594,17 +601,20 @@ function switchTab(tab) {
       // Check if user already submitted answers
       const alreadySubmitted = state.results.some(p => p.nickname.toLowerCase() === state.nickname.toLowerCase());
       if (alreadySubmitted) {
+        stopQuizTimer();
         showView('view-score');
         startResultsPolling();
       } else {
         checkExamStateAndProceed();
       }
     } else {
+      stopQuizTimer();
       showView('view-join');
       stopResultsPolling();
     }
   } else {
     // Admin View
+    stopQuizTimer();
     stopExamStateCheck();
     showView('view-admin');
     if (el.displayRoomCode) {
@@ -687,6 +697,60 @@ function handleVisibilityChange() {
 // ==========================================================================
 // EXAM LOCK / SYNCHRONIZATION BEHAVIOR
 // ==========================================================================
+let quizTimerInterval = null;
+
+function startQuizTimer(endTimeStr) {
+  if (quizTimerInterval) clearInterval(quizTimerInterval);
+  if (!endTimeStr) {
+    el.quizTimerBanner.classList.add('hidden');
+    return;
+  }
+
+  const endTime = new Date(endTimeStr).getTime();
+  el.quizTimerBanner.classList.remove('hidden');
+
+  function tick() {
+    const now = new Date().getTime();
+    const diff = endTime - now;
+
+    if (diff <= 0) {
+      clearInterval(quizTimerInterval);
+      el.timerCountdown.textContent = "00:00";
+      alert("제한 시간이 모두 경과하여 답안이 자동으로 제출됩니다.");
+      handleQuizSubmit(null, true); // Trigger auto submit!
+      return;
+    }
+
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+    const pad = (num) => String(num).padStart(2, '0');
+    el.timerCountdown.textContent = `${pad(minutes)}:${pad(seconds)}`;
+
+    // Flash background red if under 30 seconds
+    if (diff < 30 * 1000) {
+      el.quizTimerBanner.style.background = (seconds % 2 === 0) ? 'rgba(239, 68, 68, 0.25)' : 'rgba(239, 68, 68, 0.1)';
+      el.quizTimerBanner.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+    } else {
+      el.quizTimerBanner.style.background = 'rgba(239, 68, 68, 0.1)';
+      el.quizTimerBanner.style.borderColor = 'rgba(239, 68, 68, 0.2)';
+    }
+  }
+
+  tick();
+  quizTimerInterval = setInterval(tick, 1000);
+}
+
+function stopQuizTimer() {
+  if (quizTimerInterval) {
+    clearInterval(quizTimerInterval);
+    quizTimerInterval = null;
+  }
+  if (el.quizTimerBanner) {
+    el.quizTimerBanner.classList.add('hidden');
+  }
+}
+
 async function checkExamStateAndProceed() {
   try {
     const res = await fetch(`${API_BASE}/api/exam/state?roomCode=${state.roomCode}`);
@@ -695,11 +759,13 @@ async function checkExamStateAndProceed() {
 
     if (state.examState === 'locked') {
       showView('view-wait');
+      stopQuizTimer();
       startExamStateCheck();
     } else {
       stopExamStateCheck();
       showView('view-quiz');
       startCheatingDetection(); // Enable cheating prevention when quiz starts!
+      startQuizTimer(data.examEndTime); // Start timer countdown!
     }
   } catch (error) {
     console.error("Error fetching exam state:", error);
@@ -717,6 +783,7 @@ function startExamStateCheck() {
         stopExamStateCheck();
         showView('view-quiz');
         startCheatingDetection(); // Enable cheating prevention when quiz unlocks!
+        startQuizTimer(data.examEndTime); // Start timer countdown!
       }
     } catch (e) {
       console.error(e);
@@ -1003,8 +1070,8 @@ async function handleJoinSubmit(e) {
 }
 
 // Handle Student Quiz Answers Submit
-async function handleQuizSubmit(e) {
-  e.preventDefault();
+async function handleQuizSubmit(e, isAutoSubmit = false) {
+  if (e && e.preventDefault) e.preventDefault();
   
   if (!state.nickname || !state.roomCode) {
     alert(t('alert_profile_missing'));
@@ -1012,15 +1079,18 @@ async function handleQuizSubmit(e) {
     return;
   }
 
-  const unansweredCount = state.questions.length - Object.keys(state.answers).length;
-  if (unansweredCount > 0) {
-    const msg = t('alert_unanswered').replace('{count}', unansweredCount);
-    if (!confirm(msg)) {
-      return;
+  if (!isAutoSubmit) {
+    const unansweredCount = state.questions.length - Object.keys(state.answers).length;
+    if (unansweredCount > 0) {
+      const msg = t('alert_unanswered').replace('{count}', unansweredCount);
+      if (!confirm(msg)) {
+        return;
+      }
     }
   }
 
   stopCheatingDetection();
+  stopQuizTimer();
 
   try {
     const res = await fetch(`${API_BASE}/api/submit`, {
@@ -1049,6 +1119,7 @@ async function handleQuizSubmit(e) {
     el.scoreSubmitTime.textContent = timeString;
     
     showView('view-score');
+    triggerConfetti(); // Trigger the beautiful celebration confetti!
     startResultsPolling();
   } catch (error) {
     console.error('Error submitting quiz:', error);
@@ -1161,11 +1232,13 @@ async function handleResetQuiz() {
 // ==========================================================================
 async function handleToggleExamState() {
   const nextState = state.examState === 'locked' ? 'active' : 'locked';
+  const timeLimit = el.adminTimerInput ? (parseInt(el.adminTimerInput.value.trim()) || 0) : 0;
+
   try {
     const res = await fetch(`${API_BASE}/api/exam/state`, {
       method: 'POST',
       headers: getAdminHeaders(),
-      body: JSON.stringify({ roomCode: state.roomCode, examState: nextState })
+      body: JSON.stringify({ roomCode: state.roomCode, examState: nextState, timeLimit })
     });
     const data = await res.json();
     if (res.ok) {
@@ -1652,4 +1725,79 @@ function toggleMcqOptionsRequired(isRequired) {
     const elOpt = document.getElementById(`opt-${i}`);
     if (elOpt) elOpt.required = isRequired;
   }
+}
+
+// Celebration Confetti HTML5 Canvas generator
+function triggerConfetti() {
+  const canvas = document.createElement('canvas');
+  canvas.id = 'confetti-canvas';
+  canvas.style.position = 'fixed';
+  canvas.style.top = '0';
+  canvas.style.left = '0';
+  canvas.style.width = '100%';
+  canvas.style.height = '100%';
+  canvas.style.pointerEvents = 'none';
+  canvas.style.zIndex = '9999';
+  document.body.appendChild(canvas);
+
+  const ctx = canvas.getContext('2d');
+  let width = canvas.width = window.innerWidth;
+  let height = canvas.height = window.innerHeight;
+
+  window.addEventListener('resize', () => {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+  });
+
+  const colors = ['#6366f1', '#a855f7', '#10b981', '#f59e0b', '#ef4444', '#06b6d4'];
+  const particles = [];
+
+  for (let i = 0; i < 150; i++) {
+    particles.push({
+      x: Math.random() * width,
+      y: Math.random() * height - height, // Start above screen
+      r: Math.random() * 6 + 4,
+      d: Math.random() * height,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      tilt: Math.random() * 10 - 5,
+      tiltAngleIncremental: Math.random() * 0.07 + 0.02,
+      tiltAngle: 0
+    });
+  }
+
+  let animationId;
+  function draw() {
+    ctx.clearRect(0, 0, width, height);
+    let active = false;
+
+    particles.forEach((p, idx) => {
+      p.tiltAngle += p.tiltAngleIncremental;
+      p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2;
+      p.x += Math.sin(p.tiltAngle);
+      p.tilt = Math.sin(p.tiltAngle - idx / 3) * 15;
+
+      if (p.y <= height) {
+        active = true;
+      }
+
+      ctx.beginPath();
+      ctx.lineWidth = p.r;
+      ctx.strokeStyle = p.color;
+      ctx.moveTo(p.x + p.tilt + p.r / 2, p.y);
+      ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+      ctx.stroke();
+    });
+
+    if (active) {
+      animationId = requestAnimationFrame(draw);
+    } else {
+      canvas.remove();
+    }
+  }
+
+  draw();
+  setTimeout(() => {
+    cancelAnimationFrame(animationId);
+    canvas.remove();
+  }, 6000);
 }

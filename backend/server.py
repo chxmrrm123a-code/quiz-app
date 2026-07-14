@@ -5,7 +5,7 @@ import re
 import urllib.parse
 import socket
 import random
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # Define base paths
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -135,9 +135,13 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
             db = read_db()
             room = db.get("rooms", {}).get(room_code)
             if not room:
-                self.send_json_response(200, {"examState": "locked"})
+                self.send_json_response(200, {"examState": "locked", "timeLimit": 0, "examEndTime": None})
                 return
-            self.send_json_response(200, {"examState": room.get("examState", "locked")})
+            self.send_json_response(200, {
+                "examState": room.get("examState", "locked"),
+                "timeLimit": room.get("timeLimit", 0),
+                "examEndTime": room.get("examEndTime", None)
+            })
             return
         
         elif path == '/api/results':
@@ -259,6 +263,8 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
                 "questions": DEFAULT_QUESTIONS.copy(),
                 "participants": [],
                 "examState": "locked",
+                "timeLimit": 0,
+                "examEndTime": None,
                 "createdAt": datetime.utcnow().isoformat() + "Z"
             }
             write_db(db)
@@ -454,6 +460,7 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
 
             room_code = str(body.get('roomCode', '')).strip()
             state_val = body.get('examState', 'locked')
+            time_limit = int(body.get('timeLimit', 0))
 
             if not room_code:
                 self.send_error_response(400, "roomCode is required")
@@ -468,8 +475,21 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
                 return
 
             db["rooms"][room_code]["examState"] = state_val
+            
+            if state_val == 'active' and time_limit > 0:
+                db["rooms"][room_code]["timeLimit"] = time_limit
+                db["rooms"][room_code]["examEndTime"] = (datetime.utcnow() + timedelta(minutes=time_limit)).isoformat() + "Z"
+            else:
+                db["rooms"][room_code]["timeLimit"] = 0
+                db["rooms"][room_code]["examEndTime"] = None
+
             write_db(db)
-            self.send_json_response(200, {"success": True, "examState": state_val})
+            self.send_json_response(200, {
+                "success": True,
+                "examState": state_val,
+                "timeLimit": db["rooms"][room_code]["timeLimit"],
+                "examEndTime": db["rooms"][room_code]["examEndTime"]
+            })
             return
 
         # Reset all results for a room
