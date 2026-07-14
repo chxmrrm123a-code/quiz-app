@@ -4,6 +4,7 @@ import os
 import re
 import urllib.parse
 import socket
+import random
 from datetime import datetime
 
 # Define base paths
@@ -11,37 +12,37 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, 'data', 'db.json')
 FRONTEND_DIR = os.path.abspath(os.path.join(BASE_DIR, '..', 'frontend'))
 
+DEFAULT_QUESTIONS = [
+    {
+        "id": "q1",
+        "type": "multiple-choice",
+        "questionText": "대한민국의 수도는 어디인가요?",
+        "options": ["부산", "인천", "서울", "대구"],
+        "correctAnswer": "서울",
+        "imageUrl": None
+    },
+    {
+        "id": "q2",
+        "type": "short-answer",
+        "questionText": "인터넷 브라우저에서 웹페이지를 구조화하는 데 사용되는 기본 마크업 언어의 약자(영어 4글자)는 무엇인가요?",
+        "correctAnswer": "HTML",
+        "imageUrl": None
+    },
+    {
+        "id": "q3",
+        "type": "multiple-choice",
+        "questionText": "다음 중 자바스크립트(JavaScript)의 기본 데이터 타입이 아닌 것은 무엇인가요?",
+        "options": ["Number", "String", "Boolean", "Class"],
+        "correctAnswer": "Class",
+        "imageUrl": None
+    }
+]
+
 # Ensure data directory and db.json exist
 os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
 if not os.path.exists(DB_PATH):
     default_db = {
-        "questions": [
-            {
-                "id": "q1",
-                "type": "multiple-choice",
-                "questionText": "대한민국의 수도는 어디인가요?",
-                "options": ["부산", "인천", "서울", "대구"],
-                "correctAnswer": "서울",
-                "imageUrl": null
-            },
-            {
-                "id": "q2",
-                "type": "short-answer",
-                "questionText": "인터넷 브라우저에서 웹페이지를 구조화하는 데 사용되는 기본 마크업 언어의 약자(영어 4글자)는 무엇인가요?",
-                "correctAnswer": "HTML",
-                "imageUrl": null
-            },
-            {
-                "id": "q3",
-                "type": "multiple-choice",
-                "questionText": "다음 중 자바스크립트(JavaScript)의 기본 데이터 타입이 아닌 것은 무엇인가요?",
-                "options": ["Number", "String", "Boolean", "Class"],
-                "correctAnswer": "Class",
-                "imageUrl": null
-            }
-        ],
-        "participants": [],
-        "examState": "locked"
+        "rooms": {}
     }
     with open(DB_PATH, 'w', encoding='utf-8') as f:
         json.dump(default_db, f, indent=2, ensure_ascii=False)
@@ -51,14 +52,12 @@ def read_db():
     try:
         with open(DB_PATH, 'r', encoding='utf-8') as f:
             db = json.load(f)
-            # Ensure essential keys exist
-            if "questions" not in db: db["questions"] = []
-            if "participants" not in db: db["participants"] = []
-            if "examState" not in db: db["examState"] = "locked"
+            if "rooms" not in db:
+                db["rooms"] = {}
             return db
     except Exception as e:
         print(f"Error reading database: {e}")
-        return {"questions": [], "participants": [], "examState": "locked"}
+        return {"rooms": {}}
 
 
 def write_db(data):
@@ -104,10 +103,22 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
         parsed_url = urllib.parse.urlparse(self.path)
         path = parsed_url.path
+        query = urllib.parse.parse_qs(parsed_url.query)
+
+        # Helper to get parameter
+        room_code = query.get('roomCode', [None])[0]
 
         # --- API Endpoints ---
         if path == '/api/questions':
-            self.send_json_response(200, read_db().get("questions", []))
+            if not room_code:
+                self.send_error_response(400, "방 번호(roomCode)가 필요합니다.")
+                return
+            db = read_db()
+            room = db.get("rooms", {}).get(room_code)
+            if not room:
+                self.send_json_response(200, []) # Return empty if room doesn't exist yet
+                return
+            self.send_json_response(200, room.get("questions", []))
             return
         
         elif path == '/api/info':
@@ -118,17 +129,31 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
             return
 
         elif path == '/api/exam/state':
+            if not room_code:
+                self.send_error_response(400, "방 번호(roomCode)가 필요합니다.")
+                return
             db = read_db()
-            self.send_json_response(200, {"examState": db.get("examState", "locked")})
+            room = db.get("rooms", {}).get(room_code)
+            if not room:
+                self.send_json_response(200, {"examState": "locked"})
+                return
+            self.send_json_response(200, {"examState": room.get("examState", "locked")})
             return
         
         elif path == '/api/results':
-            # Admin authentication is required to view detailed results
             if not self.check_admin_auth():
+                return
+            if not room_code:
+                self.send_error_response(400, "방 번호(roomCode)가 필요합니다.")
                 return
 
             db = read_db()
-            participants = db.get("participants", [])
+            room = db.get("rooms", {}).get(room_code)
+            if not room:
+                self.send_json_response(200, [])
+                return
+
+            participants = room.get("participants", [])
             results = [p for p in participants if p.get("score") is not None]
             
             # Sort by score desc, then by speed (submittedAt asc)
@@ -190,15 +215,57 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
                 self.send_error_response(401, "잘못된 PIN 번호입니다.")
             return
 
+        # Create new quiz room (Admin)
+        elif path == '/api/room/create':
+            if not self.check_admin_auth(): return
+
+            db = read_db()
+            rooms = db.get("rooms", {})
+
+            # Generate unique 4-digit code
+            room_code = None
+            for _ in range(50):
+                candidate = str(random.randint(1000, 9999))
+                if candidate not in rooms:
+                    room_code = candidate
+                    break
+            
+            if not room_code:
+                self.send_error_response(500, "방 코드를 생성할 수 없습니다. 다시 시도해 주세요.")
+                return
+
+            # Initialize room
+            db["rooms"][room_code] = {
+                "questions": DEFAULT_QUESTIONS.copy(),
+                "participants": [],
+                "examState": "locked",
+                "createdAt": datetime.utcnow().isoformat() + "Z"
+            }
+            write_db(db)
+
+            self.send_json_response(201, {"success": True, "roomCode": room_code})
+            return
+
         # Join as participant (Student)
         elif path == '/api/join':
             nickname = body.get('nickname', '').strip()
+            room_code = str(body.get('roomCode', '')).strip()
+
             if not nickname:
                 self.send_error_response(400, "닉네임을 입력해 주세요.")
                 return
+            if not room_code:
+                self.send_error_response(400, "방 번호를 입력해 주세요.")
+                return
 
             db = read_db()
-            participants = db.get("participants", [])
+            rooms = db.get("rooms", {})
+
+            if room_code not in rooms:
+                self.send_error_response(404, "존재하지 않는 방 번호입니다.")
+                return
+
+            participants = rooms[room_code].get("participants", [])
 
             if any(p["nickname"].lower() == nickname.lower() for p in participants):
                 self.send_error_response(400, "이미 사용 중인 닉네임입니다. 다른 닉네임을 입력해 주세요.")
@@ -213,31 +280,37 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
                 "answers": {},
                 "tabSwitches": 0
             }
-            db["participants"].append(new_participant)
+            db["rooms"][room_code]["participants"].append(new_participant)
             write_db(db)
 
-            self.send_json_response(201, {"success": True, "nickname": nickname})
+            self.send_json_response(201, {"success": True, "nickname": nickname, "roomCode": room_code})
             return
 
         # Submit answers (Student)
         elif path == '/api/submit':
             nickname = body.get('nickname', '').strip()
+            room_code = str(body.get('roomCode', '')).strip()
             answers = body.get('answers', {})
             tab_switches = int(body.get('tabSwitches', 0))
 
-            if not nickname:
-                self.send_error_response(400, "Nickname is required")
+            if not nickname or not room_code:
+                self.send_error_response(400, "Nickname and roomCode are required")
                 return
 
             db = read_db()
-            participants = db.get("participants", [])
-            
+            rooms = db.get("rooms", {})
+            if room_code not in rooms:
+                self.send_error_response(404, "존재하지 않는 방 번호입니다.")
+                return
+
+            participants = rooms[room_code].get("participants", [])
             user_idx = next((i for i, p in enumerate(participants) if p["nickname"].lower() == nickname.lower()), -1)
+            
             if user_idx == -1:
                 self.send_error_response(404, "등록되지 않은 참가자입니다. 먼저 입장해 주세요.")
                 return
 
-            questions = db.get("questions", [])
+            questions = rooms[room_code].get("questions", [])
             score_count = 0
             total_count = len(questions)
 
@@ -250,12 +323,12 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
 
             percentage_score = round((score_count / total_count) * 100) if total_count > 0 else 0
 
-            db["participants"][user_idx]["score"] = percentage_score
-            db["participants"][user_idx]["correctCount"] = score_count
-            db["participants"][user_idx]["totalCount"] = total_count
-            db["participants"][user_idx]["submittedAt"] = datetime.utcnow().isoformat() + "Z"
-            db["participants"][user_idx]["answers"] = answers
-            db["participants"][user_idx]["tabSwitches"] = tab_switches
+            db["rooms"][room_code]["participants"][user_idx]["score"] = percentage_score
+            db["rooms"][room_code]["participants"][user_idx]["correctCount"] = score_count
+            db["rooms"][room_code]["participants"][user_idx]["totalCount"] = total_count
+            db["rooms"][room_code]["participants"][user_idx]["submittedAt"] = datetime.utcnow().isoformat() + "Z"
+            db["rooms"][room_code]["participants"][user_idx]["answers"] = answers
+            db["rooms"][room_code]["participants"][user_idx]["tabSwitches"] = tab_switches
             write_db(db)
 
             self.send_json_response(200, {
@@ -272,17 +345,22 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
         elif path == '/api/questions':
             if not self.check_admin_auth(): return
 
+            room_code = str(body.get('roomCode', '')).strip()
             q_type = body.get('type')
             q_text = body.get('questionText')
             q_correct = body.get('correctAnswer')
             q_options = body.get('options', [])
             q_image = body.get('imageUrl', None)
 
-            if not q_type or not q_text or q_correct is None:
+            if not room_code or not q_type or not q_text or q_correct is None:
                 self.send_error_response(400, "Missing required fields")
                 return
 
             db = read_db()
+            if room_code not in db.get("rooms", {}):
+                self.send_error_response(404, "Room not found")
+                return
+
             new_question = {
                 "id": f"q_{int(datetime.now().timestamp() * 1000)}",
                 "type": q_type,
@@ -291,7 +369,7 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
                 "correctAnswer": str(q_correct).strip(),
                 "imageUrl": q_image
             }
-            db["questions"].append(new_question)
+            db["rooms"][room_code]["questions"].append(new_question)
             write_db(db)
 
             self.send_json_response(201, new_question)
@@ -301,13 +379,22 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
         elif path == '/api/questions/import':
             if not self.check_admin_auth(): return
 
+            room_code = str(body.get('roomCode', '')).strip()
             import_list = body.get('questions', [])
+
+            if not room_code:
+                self.send_error_response(400, "roomCode is required")
+                return
             if not isinstance(import_list, list):
                 self.send_error_response(400, "Invalid questions format. Must be an array.")
                 return
 
             db = read_db()
-            db["questions"] = import_list
+            if room_code not in db.get("rooms", {}):
+                self.send_error_response(404, "Room not found")
+                return
+
+            db["rooms"][room_code]["questions"] = import_list
             write_db(db)
             self.send_json_response(200, {"success": True, "count": len(import_list)})
             return
@@ -316,25 +403,43 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
         elif path == '/api/exam/state':
             if not self.check_admin_auth(): return
 
+            room_code = str(body.get('roomCode', '')).strip()
             state_val = body.get('examState', 'locked')
+
+            if not room_code:
+                self.send_error_response(400, "roomCode is required")
+                return
             if state_val not in ['locked', 'active']:
                 self.send_error_response(400, "Invalid examState value")
                 return
 
             db = read_db()
-            db["examState"] = state_val
+            if room_code not in db.get("rooms", {}):
+                self.send_error_response(404, "Room not found")
+                return
+
+            db["rooms"][room_code]["examState"] = state_val
             write_db(db)
             self.send_json_response(200, {"success": True, "examState": state_val})
             return
 
-        # Reset all results
+        # Reset all results for a room
         elif path == '/api/reset':
             if not self.check_admin_auth(): return
 
+            room_code = str(body.get('roomCode', '')).strip()
+            if not room_code:
+                self.send_error_response(400, "roomCode is required")
+                return
+
             db = read_db()
-            db["participants"] = []
+            if room_code not in db.get("rooms", {}):
+                self.send_error_response(404, "Room not found")
+                return
+
+            db["rooms"][room_code]["participants"] = []
             write_db(db)
-            self.send_json_response(200, {"success": True, "message": "All participant results reset."})
+            self.send_json_response(200, {"success": True, "message": "Room results reset successfully."})
             return
 
         else:
@@ -345,8 +450,14 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
 
         parsed_url = urllib.parse.urlparse(self.path)
         path = parsed_url.path
+        query = urllib.parse.parse_qs(parsed_url.query)
+        room_code = query.get('roomCode', [None])[0]
 
-        match = re.match(r'^/api/questions/([^/]+)$', path)
+        if not room_code:
+            self.send_error_response(400, "roomCode query param is required")
+            return
+
+        match = re.match(r'^/api/questions/([^/?]+)', path)
         if match:
             q_id = match.group(1)
             content_length = int(self.headers.get('Content-Length', 0))
@@ -359,8 +470,12 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
                 return
 
             db = read_db()
-            questions = db.get("questions", [])
-            
+            room = db.get("rooms", {}).get(room_code)
+            if not room:
+                self.send_error_response(404, "Room not found")
+                return
+
+            questions = room.get("questions", [])
             q_idx = next((i for i, q in enumerate(questions) if q["id"] == q_id), -1)
             if q_idx == -1:
                 self.send_error_response(404, "Question not found")
@@ -376,7 +491,7 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
             else:
                 questions[q_idx]["options"] = []
 
-            db["questions"] = questions
+            db["rooms"][room_code]["questions"] = questions
             write_db(db)
 
             self.send_json_response(200, questions[q_idx])
@@ -389,19 +504,29 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
 
         parsed_url = urllib.parse.urlparse(self.path)
         path = parsed_url.path
+        query = urllib.parse.parse_qs(parsed_url.query)
+        room_code = query.get('roomCode', [None])[0]
 
-        match = re.match(r'^/api/questions/([^/]+)$', path)
+        if not room_code:
+            self.send_error_response(400, "roomCode query param is required")
+            return
+
+        match = re.match(r'^/api/questions/([^/?]+)', path)
         if match:
             q_id = match.group(1)
             db = read_db()
-            questions = db.get("questions", [])
-            
+            room = db.get("rooms", {}).get(room_code)
+            if not room:
+                self.send_error_response(404, "Room not found")
+                return
+
+            questions = room.get("questions", [])
             filtered = [q for q in questions if q["id"] != q_id]
             if len(filtered) == len(questions):
                 self.send_error_response(404, "Question not found")
                 return
 
-            db["questions"] = filtered
+            db["rooms"][room_code]["questions"] = filtered
             write_db(db)
             self.send_json_response(200, {"success": True, "message": "Question deleted successfully"})
             return

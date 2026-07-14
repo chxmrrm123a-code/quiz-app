@@ -27,6 +27,15 @@ const translations = {
     state_col: "상태",
     state_completed: "완료",
     
+    // Room Code Labels
+    room_code_label: "방 번호 (Room Code)",
+    room_code_placeholder: "4자리 방 번호를 입력하세요",
+    room_select_title: "퀴즈 방 관리",
+    room_select_desc: "새로운 퀴즈 방을 개설하거나 기존에 진행 중인 방으로 입장하세요.",
+    room_create_btn: "새로운 퀴즈 방 만들기",
+    room_enter_label: "기존 방 입장하기",
+    room_enter_btn: "진입하기",
+    
     // Student Wait
     wait_title: "시험 대기 중...",
     wait_desc: "선생님이 시험을 시작하실 때까지 대기해 주세요. 시작 시 자동으로 화면이 전환됩니다.",
@@ -82,6 +91,10 @@ const translations = {
     // Alerts/Prompts
     alert_pin_success: "선생님 인증에 성공했습니다!",
     alert_pin_fail: "잘못된 PIN 번호입니다.",
+    alert_room_empty: "방 번호를 입력해 주세요.",
+    alert_room_invalid: "방 번호는 4자리 숫자여야 합니다.",
+    alert_room_not_found: "존재하지 않는 방 번호입니다.",
+    alert_room_created: "새로운 퀴즈 방이 생성되었습니다! 방 번호: {code}",
     alert_import_success: "문제를 성공적으로 불러왔습니다!",
     alert_import_fail: "파일 형식이 잘못되었거나 불러오기에 실패했습니다.",
     alert_join_empty: "닉네임을 입력해 주세요.",
@@ -127,6 +140,15 @@ const translations = {
     time_col: "Thời gian nộp",
     state_col: "Trạng thái",
     state_completed: "Đã xong",
+    
+    // Room Code Labels
+    room_code_label: "Mã phòng (Room Code)",
+    room_code_placeholder: "Nhập mã phòng 4 chữ số",
+    room_select_title: "Quản lý phòng thi",
+    room_select_desc: "Tạo phòng thi mới hoặc tham gia vào phòng thi đang hoạt động.",
+    room_create_btn: "Tạo phòng thi mới",
+    room_enter_label: "Tham gia phòng đã có",
+    room_enter_btn: "Vào phòng",
     
     // Student Wait
     wait_title: "Đang chờ thi...",
@@ -183,6 +205,10 @@ const translations = {
     // Alerts/Prompts
     alert_pin_success: "Xác thực giáo viên thành công!",
     alert_pin_fail: "Mã PIN không chính xác.",
+    alert_room_empty: "Vui lòng nhập mã phòng.",
+    alert_room_invalid: "Mã phòng phải là 4 chữ số.",
+    alert_room_not_found: "Không tìm thấy mã phòng này.",
+    alert_room_created: "Đã tạo phòng thi mới thành công! Mã: {code}",
     alert_import_success: "Nhập câu hỏi thành công!",
     alert_import_fail: "Định dạng tệp không hợp lệ hoặc nhập thất bại.",
     alert_join_empty: "Vui lòng nhập biệt danh của bạn.",
@@ -229,6 +255,15 @@ const translations = {
     state_col: "Status",
     state_completed: "Completed",
     
+    // Room Code Labels
+    room_code_label: "Room Code",
+    room_code_placeholder: "Enter 4-digit Room Code",
+    room_select_title: "Quiz Room Management",
+    room_select_desc: "Create a new quiz room or enter an active room.",
+    room_create_btn: "Create New Quiz Room",
+    room_enter_label: "Enter Existing Room",
+    room_enter_btn: "Enter Room",
+    
     // Student Wait
     wait_title: "Waiting for Exam...",
     wait_desc: "Please wait until the teacher starts the exam. The screen will automatically transition when started.",
@@ -239,7 +274,7 @@ const translations = {
     admin_pin_label: "PIN Code (Default: 1234)",
     admin_pin_placeholder: "Enter PIN code",
     admin_login_btn: "Authenticate",
-
+ 
     // Admin Dashboard
     admin_title: "Create & Edit Questions",
     admin_new_btn: "Add New Question",
@@ -284,6 +319,10 @@ const translations = {
     // Alerts/Prompts
     alert_pin_success: "Teacher authenticated successfully!",
     alert_pin_fail: "Invalid PIN code.",
+    alert_room_empty: "Please enter a Room Code.",
+    alert_room_invalid: "Room Code must be 4 digits.",
+    alert_room_not_found: "Room not found.",
+    alert_room_created: "New quiz room created! Room Code: {code}",
     alert_import_success: "Questions imported successfully!",
     alert_import_fail: "Invalid file format or import failed.",
     alert_join_empty: "Please enter a nickname.",
@@ -315,13 +354,14 @@ const API_BASE = window.location.origin; // Same origin (e.g. http://localhost:8
 let state = {
   activeTab: 'student', // 'student' | 'admin'
   nickname: sessionStorage.getItem('quiz_nickname') || null,
+  roomCode: sessionStorage.getItem('quiz_room_code') || null,
   questions: [],
   answers: {}, // { questionId: answerText }
   results: [],
   pollingInterval: null,
   editingQuestionId: null, // null if adding new
   currentQuestionImage: null, // Base64 string of the selected image
-  currentLang: localStorage.getItem('quiz_lang') || 'ko',
+  currentLang: localStorage.getItem('quiz_lang') || 'en',
   adminToken: sessionStorage.getItem('admin_token') || null, // PIN string if authenticated
   examState: 'locked', // 'locked' | 'active'
   tabSwitches: 0,
@@ -348,15 +388,24 @@ function initElements() {
   el.viewQuiz = document.getElementById('view-quiz');
   el.viewScore = document.getElementById('view-score');
   el.viewAdminLogin = document.getElementById('view-admin-login');
+  el.viewAdminRoomSelect = document.getElementById('view-admin-room-select');
   el.viewAdmin = document.getElementById('view-admin');
   
   // Forms
   el.joinForm = document.getElementById('join-form');
+  el.studentRoomCodeInput = document.getElementById('room-code');
   el.studentNicknameInput = document.getElementById('student-nickname');
   el.quizForm = document.getElementById('quiz-form');
   el.questionsContainer = document.getElementById('questions-container');
+  
   el.adminLoginForm = document.getElementById('admin-login-form');
   el.adminPinInput = document.getElementById('admin-pin-input');
+  
+  el.btnCreateRoom = document.getElementById('btn-create-room');
+  el.adminRoomEnterForm = document.getElementById('admin-room-enter-form');
+  el.adminRoomCodeInput = document.getElementById('admin-room-code-input');
+  el.displayRoomCode = document.getElementById('display-room-code');
+  
   el.questionEditorForm = document.getElementById('question-editor-form');
   el.questionFormContainer = document.getElementById('question-form-container');
   
@@ -414,6 +463,14 @@ function setupEventListeners() {
 
   // Admin Login
   el.adminLoginForm.addEventListener('submit', handleAdminLogin);
+
+  // Room Create & Enter
+  if (el.btnCreateRoom) {
+    el.btnCreateRoom.addEventListener('click', handleCreateRoom);
+  }
+  if (el.adminRoomEnterForm) {
+    el.adminRoomEnterForm.addEventListener('submit', handleEnterRoom);
+  }
 
   // Admin Question Type change (MCQ options block toggle)
   el.qType.addEventListener('change', (e) => {
@@ -521,7 +578,7 @@ function switchTab(tab) {
   if (tab === 'student') {
     stopCheatingDetection(); // Make sure no student events trigger on load
     
-    if (state.nickname) {
+    if (state.nickname && state.roomCode) {
       // Check if user already submitted answers
       const alreadySubmitted = state.results.some(p => p.nickname.toLowerCase() === state.nickname.toLowerCase());
       if (alreadySubmitted) {
@@ -538,6 +595,9 @@ function switchTab(tab) {
     // Admin View
     stopExamStateCheck();
     showView('view-admin');
+    if (el.displayRoomCode) {
+      el.displayRoomCode.textContent = state.roomCode;
+    }
     setupQrCode();
     fetchQuestions();
     fetchResults();
@@ -548,17 +608,37 @@ function switchTab(tab) {
 function checkRoute() {
   applyLanguage(state.currentLang); // Apply saved/default language on load
   const path = window.location.pathname.toLowerCase().replace(/\/$/, "");
+  
   if (path === '/admin') {
     if (state.adminToken) {
-      switchTab('admin');
+      if (state.roomCode) {
+        switchTab('admin');
+      } else {
+        showView('view-admin-room-select');
+      }
     } else {
       showView('view-admin-login');
     }
   } else {
-    // Sync current results (needed to see if student already submitted)
-    fetchResults().then(() => {
+    // Check if query contains ?room=xxxx
+    const urlParams = new URLSearchParams(window.location.search);
+    const roomParam = urlParams.get('room');
+    if (roomParam && roomParam.match(/^\d{4}$/)) {
+      state.roomCode = roomParam;
+      sessionStorage.setItem('quiz_room_code', roomParam);
+      if (el.studentRoomCodeInput) {
+        el.studentRoomCodeInput.value = roomParam;
+        el.studentRoomCodeInput.disabled = true; // Block edits
+      }
+    }
+
+    if (state.nickname && state.roomCode) {
+      fetchResults().then(() => {
+        switchTab('student');
+      });
+    } else {
       switchTab('student');
-    });
+    }
   }
 }
 
@@ -586,7 +666,7 @@ function handleVisibilityChange() {
 // ==========================================================================
 async function checkExamStateAndProceed() {
   try {
-    const res = await fetch(`${API_BASE}/api/exam/state`);
+    const res = await fetch(`${API_BASE}/api/exam/state?roomCode=${state.roomCode}`);
     const data = await res.json();
     state.examState = data.examState;
 
@@ -606,10 +686,9 @@ async function checkExamStateAndProceed() {
 
 function startExamStateCheck() {
   if (state.examStateInterval) clearInterval(state.examStateInterval);
-  // Check exam lock state every 2 seconds
   state.examStateInterval = setInterval(async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/exam/state`);
+      const res = await fetch(`${API_BASE}/api/exam/state?roomCode=${state.roomCode}`);
       const data = await res.json();
       if (data.examState === 'active') {
         stopExamStateCheck();
@@ -659,7 +738,7 @@ function handleImageRemove() {
 }
 
 function showView(viewId) {
-  const views = [el.viewJoin, el.viewWait, el.viewQuiz, el.viewScore, el.viewAdminLogin, el.viewAdmin];
+  const views = [el.viewJoin, el.viewWait, el.viewQuiz, el.viewScore, el.viewAdminLogin, el.viewAdminRoomSelect, el.viewAdmin];
   views.forEach(v => {
     if (v.id === viewId) {
       v.classList.add('active');
@@ -693,7 +772,11 @@ async function setupQrCode() {
     
     const ip = info.localIp || '127.0.0.1';
     const port = info.port || 8000;
-    const targetUrl = ip !== '127.0.0.1' ? `http://${ip}:${port}` : window.location.origin;
+    
+    // Scan links directly bind to the specific room code!
+    const targetUrl = ip !== '127.0.0.1' 
+      ? `http://${ip}:${port}/?room=${state.roomCode}` 
+      : `${window.location.origin}/?room=${state.roomCode}`;
 
     if (el.adminLocalUrl) {
       el.adminLocalUrl.textContent = targetUrl;
@@ -727,7 +810,7 @@ function getAdminHeaders() {
   };
 }
 
-// Handle Admin Authenticate
+// Handle Admin Authenticate (PIN check)
 async function handleAdminLogin(e) {
   e.preventDefault();
   const pin = el.adminPinInput.value.trim();
@@ -746,13 +829,61 @@ async function handleAdminLogin(e) {
       return;
     }
 
-    // Success
     state.adminToken = pin;
     sessionStorage.setItem('admin_token', pin);
     alert(t('alert_pin_success'));
-    switchTab('admin');
+    showView('view-admin-room-select');
   } catch (error) {
     console.error("Auth error:", error);
+    alert(t('alert_server_error'));
+  }
+}
+
+// Create New Room (Admin)
+async function handleCreateRoom() {
+  try {
+    const res = await fetch(`${API_BASE}/api/room/create`, {
+      method: 'POST',
+      headers: getAdminHeaders()
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      alert(data.error || '방 생성 실패');
+      return;
+    }
+
+    state.roomCode = data.roomCode;
+    sessionStorage.setItem('quiz_room_code', data.roomCode);
+    alert(t('alert_room_created').replace('{code}', data.roomCode));
+    switchTab('admin');
+  } catch (error) {
+    console.error("Room creation error:", error);
+    alert(t('alert_server_error'));
+  }
+}
+
+// Enter Existing Room (Admin)
+async function handleEnterRoom(e) {
+  e.preventDefault();
+  const code = el.adminRoomCodeInput.value.trim();
+  if (!code || code.length !== 4) {
+    alert(t('alert_room_invalid'));
+    return;
+  }
+
+  try {
+    // Verify room existence by fetching its questions
+    const res = await fetch(`${API_BASE}/api/questions?roomCode=${code}`);
+    if (res.status === 404) {
+      alert(t('alert_room_not_found'));
+      return;
+    }
+
+    state.roomCode = code;
+    sessionStorage.setItem('quiz_room_code', code);
+    switchTab('admin');
+  } catch (error) {
+    console.error("Enter room error:", error);
     alert(t('alert_server_error'));
   }
 }
@@ -760,7 +891,7 @@ async function handleAdminLogin(e) {
 // Fetch Questions
 async function fetchQuestions() {
   try {
-    const res = await fetch(`${API_BASE}/api/questions`);
+    const res = await fetch(`${API_BASE}/api/questions?roomCode=${state.roomCode}`);
     if (!res.ok) throw new Error('Failed to fetch questions');
     state.questions = await res.json();
     
@@ -775,21 +906,15 @@ async function fetchQuestions() {
   }
 }
 
-// Fetch Participant Results (Requires PIN)
+// Fetch Participant Results
 async function fetchResults() {
   try {
-    const headers = state.adminToken ? { 'X-Admin-PIN': state.adminToken } : {};
-    const res = await fetch(`${API_BASE}/api/results`, { headers });
+    if (!state.roomCode) return;
     
-    // If not authenticated yet, public scoreboard doesn't show detail.
-    // However, results might return 401 if we are checking without credentials from student view.
+    const headers = state.adminToken ? { 'X-Admin-PIN': state.adminToken } : {};
+    const res = await fetch(`${API_BASE}/api/results?roomCode=${state.roomCode}`, { headers });
+    
     if (res.status === 401) {
-      // Just keep results empty on student screen if auth is requested.
-      // But actually, student scoreboard fetching doesn't strictly need auth,
-      // except we configured the backend results endpoint to require auth.
-      // Let's modify: actually the results endpoint is used to populate scoreboard.
-      // So if 401, we just won't render or show error.
-      // In a real setting, we bypass the error.
       return;
     }
     
@@ -806,7 +931,13 @@ async function fetchResults() {
 // Handle Student Nickname Join
 async function handleJoinSubmit(e) {
   e.preventDefault();
+  const roomCode = el.studentRoomCodeInput.value.trim();
   const nickname = el.studentNicknameInput.value.trim();
+  
+  if (!roomCode) {
+    alert(t('alert_room_empty'));
+    return;
+  }
   if (!nickname) {
     alert(t('alert_join_empty'));
     return;
@@ -816,7 +947,7 @@ async function handleJoinSubmit(e) {
     const res = await fetch(`${API_BASE}/api/join`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nickname })
+      body: JSON.stringify({ nickname, roomCode })
     });
 
     const data = await res.json();
@@ -826,11 +957,12 @@ async function handleJoinSubmit(e) {
     }
 
     state.nickname = data.nickname;
+    state.roomCode = data.roomCode;
     sessionStorage.setItem('quiz_nickname', data.nickname);
+    sessionStorage.setItem('quiz_room_code', data.roomCode);
     el.displayNickname.textContent = data.nickname;
-    state.answers = {}; // Reset answers
+    state.answers = {};
     
-    // Check if exam is locked or active
     checkExamStateAndProceed();
   } catch (error) {
     console.error('Error joining:', error);
@@ -842,7 +974,7 @@ async function handleJoinSubmit(e) {
 async function handleQuizSubmit(e) {
   e.preventDefault();
   
-  if (!state.nickname) {
+  if (!state.nickname || !state.roomCode) {
     alert(t('alert_profile_missing'));
     switchTab('student');
     return;
@@ -856,7 +988,7 @@ async function handleQuizSubmit(e) {
     }
   }
 
-  stopCheatingDetection(); // Stop tracking when submitting
+  stopCheatingDetection();
 
   try {
     const res = await fetch(`${API_BASE}/api/submit`, {
@@ -864,6 +996,7 @@ async function handleQuizSubmit(e) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         nickname: state.nickname,
+        roomCode: state.roomCode,
         answers: state.answers,
         tabSwitches: state.tabSwitches
       })
@@ -917,10 +1050,12 @@ async function handleQuestionSubmit(e) {
     }
   }
 
-  const payload = { type, questionText, correctAnswer, options, imageUrl: state.currentQuestionImage };
+  const payload = { roomCode: state.roomCode, type, questionText, correctAnswer, options, imageUrl: state.currentQuestionImage };
   const method = state.editingQuestionId ? 'PUT' : 'POST';
+  
+  // Pass roomCode inside query parameter for PUT updates
   const endpoint = state.editingQuestionId 
-    ? `${API_BASE}/api/questions/${state.editingQuestionId}`
+    ? `${API_BASE}/api/questions/${state.editingQuestionId}?roomCode=${state.roomCode}`
     : `${API_BASE}/api/questions`;
 
   try {
@@ -948,7 +1083,7 @@ async function deleteQuestion(qId) {
   if (!confirm(t('alert_question_delete_confirm'))) return;
 
   try {
-    const res = await fetch(`${API_BASE}/api/questions/${qId}`, {
+    const res = await fetch(`${API_BASE}/api/questions/${qId}?roomCode=${state.roomCode}`, {
       method: 'DELETE',
       headers: getAdminHeaders()
     });
@@ -968,7 +1103,8 @@ async function handleResetQuiz() {
   try {
     const res = await fetch(`${API_BASE}/api/reset`, {
       method: 'POST',
-      headers: getAdminHeaders()
+      headers: getAdminHeaders(),
+      body: JSON.stringify({ roomCode: state.roomCode })
     });
     if (!res.ok) throw new Error('Failed to reset quiz data');
 
@@ -997,7 +1133,7 @@ async function handleToggleExamState() {
     const res = await fetch(`${API_BASE}/api/exam/state`, {
       method: 'POST',
       headers: getAdminHeaders(),
-      body: JSON.stringify({ examState: nextState })
+      body: JSON.stringify({ roomCode: state.roomCode, examState: nextState })
     });
     const data = await res.json();
     if (res.ok) {
@@ -1017,11 +1153,11 @@ function updateExamToggleButtonUI() {
   const iconEl = el.btnToggleExam.querySelector('i, svg');
   if (state.examState === 'active') {
     el.btnToggleExam.className = "btn btn-danger btn-block btn-sm";
-    el.toggleExamText.textContent = t('toggle_exam_text_locked') || "시험지 잠금";
+    el.toggleExamText.textContent = t('toggle_exam_text_locked') || "Lock Exam";
     if (iconEl) iconEl.setAttribute('data-lucide', 'lock');
   } else {
     el.btnToggleExam.className = "btn btn-emerald btn-block btn-sm";
-    el.toggleExamText.textContent = t('toggle_exam_text_start') || "시험 시작";
+    el.toggleExamText.textContent = t('toggle_exam_text_start') || "Start Exam";
     if (iconEl) iconEl.setAttribute('data-lucide', 'unlock');
   }
   lucide.createIcons();
@@ -1032,13 +1168,13 @@ function updateExamToggleButtonUI() {
 // ==========================================================================
 function handleExportQuestions() {
   if (state.questions.length === 0) {
-    alert("내보낼 문제가 없습니다.");
+    alert("No questions to export.");
     return;
   }
   const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state.questions, null, 2));
   const downloadAnchor = document.createElement('a');
   downloadAnchor.setAttribute("href", dataStr);
-  downloadAnchor.setAttribute("download", `quiz_questions_backup_${new Date().toISOString().split('T')[0]}.json`);
+  downloadAnchor.setAttribute("download", `quiz_questions_backup_room_${state.roomCode}_${new Date().toISOString().split('T')[0]}.json`);
   document.body.appendChild(downloadAnchor);
   downloadAnchor.click();
   downloadAnchor.remove();
@@ -1052,17 +1188,15 @@ function handleImportQuestions(e) {
   reader.onload = async (event) => {
     try {
       const parsedJson = JSON.parse(event.target.result);
-      // Validate structure (must be an array or object containing array)
       const listToImport = Array.isArray(parsedJson) ? parsedJson : (parsedJson.questions || null);
       if (!listToImport || !Array.isArray(listToImport)) {
         throw new Error("Invalid json format");
       }
 
-      // Send to server
       const res = await fetch(`${API_BASE}/api/questions/import`, {
         method: 'POST',
         headers: getAdminHeaders(),
-        body: JSON.stringify({ questions: listToImport })
+        body: JSON.stringify({ roomCode: state.roomCode, questions: listToImport })
       });
 
       const data = await res.json();
@@ -1154,7 +1288,7 @@ function renderStudentQuiz() {
 
         const marker = document.createElement('span');
         marker.className = 'option-marker';
-        marker.textContent = String.fromCharCode(65 + optIdx); // A, B, C, D
+        marker.textContent = String.fromCharCode(65 + optIdx); // A, B, C, D, E
         
         const label = document.createElement('span');
         label.textContent = opt;
@@ -1323,14 +1457,14 @@ function renderLeaderboards() {
 
     const rankBadge = `<span class="rank-badge ${rankBadgeClass}">${rank}</span>`;
     const time = new Date(p.submittedAt);
-    const timeStr = time.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const timeStr = time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
     // A. Student Leaderboard Row (Doesn't show tab switch warnings)
     const studentRow = document.createElement('tr');
     if (isCurrentUser) studentRow.style.backgroundColor = 'rgba(99, 102, 241, 0.08)';
     studentRow.innerHTML = `
       <td>${rankBadge}</td>
-      <td><strong>${p.nickname}</strong> ${isCurrentUser ? '<span class="text-gold">(나)</span>' : ''}</td>
+      <td><strong>${p.nickname}</strong> ${isCurrentUser ? '<span class="text-gold">(You)</span>' : ''}</td>
       <td>${p.correctCount} / ${p.totalCount}</td>
       <td><span class="text-emerald" style="font-weight: 800;">${p.score}${t('score_label')}</span></td>
       <td style="color: var(--text-muted); font-size: 0.8rem;">${timeStr}</td>
