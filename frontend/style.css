@@ -1103,3 +1103,68 @@ select:focus {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-8px); }
 }
+
+/* ==========================================================================
+   COMPONENTS: QR CODE ACCESS AREA
+   ========================================================================== */
+.qr-card-section {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1.2rem;
+  margin-bottom: 1.5rem;
+}
+
+.qr-container {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+.qr-code-box {
+  background: white;
+  padding: 0.5rem;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 140px;
+  height: 140px;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.qr-code-box img {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.qr-info h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+  color: var(--text-inverse);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.qr-info p {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 0.6rem;
+  line-height: 1.4;
+}
+
+.qr-info code {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-color);
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  color: var(--primary);
+  word-break: break-all;
+  display: inline-block;
+  font-family: monospace;
+}
+

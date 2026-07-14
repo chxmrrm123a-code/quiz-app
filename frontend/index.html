@@ -13,6 +13,9 @@
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   
+  <!-- QRCode.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  
   <!-- Custom Stylesheets -->
   <link rel="stylesheet" href="/style.css">
 </head>
@@ -247,6 +250,18 @@
             <div class="stat-box">
               <span id="stat-avg-score" class="stat-num">0%</span>
               <span class="stat-label">평균 점수</span>
+            </div>
+          </div>
+
+          <!-- QR Code Access Area -->
+          <div class="qr-card-section">
+            <div class="qr-container">
+              <div id="admin-qr-code" class="qr-code-box"></div>
+              <div class="qr-info">
+                <h4><i data-lucide="qr-code"></i> 모바일 간편 접속</h4>
+                <p>같은 와이파이에 연결된 스마트폰 카메라로 스캔하여 즉시 입장할 수 있습니다.</p>
+                <code id="admin-local-url">http://127.0.0.1:8000</code>
+              </div>
             </div>
           </div>
 

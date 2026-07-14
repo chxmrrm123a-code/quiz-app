@@ -33,15 +33,13 @@
   ],
   "participants": [
     {
-      "nickname": "길동",
-      "score": 100,
-      "correctCount": 3,
+      "nickname": "가누",
+      "score": 33,
+      "correctCount": 1,
       "totalCount": 3,
-      "submittedAt": "2026-07-13T11:50:44.113712Z",
+      "submittedAt": "2026-07-13T13:26:52.032100Z",
       "answers": {
-        "q1": "서울",
-        "q2": "HTML",
-        "q3": "Class"
+        "q1": "서울"
       }
     }
   ]

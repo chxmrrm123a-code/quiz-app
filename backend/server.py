@@ -3,6 +3,7 @@ import json
 import os
 import re
 import urllib.parse
+import socket
 from datetime import datetime
 
 # Define base paths
@@ -59,6 +60,19 @@ def write_db(data):
         print(f"Error writing database: {e}")
 
 
+def get_local_ip():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        # doesn't even have to be reachable
+        s.connect(('10.254.254.254', 1))
+        ip = s.getsockname()[0]
+    except Exception:
+        ip = '127.0.0.1'
+    finally:
+        s.close()
+    return ip
+
+
 class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
 
     def end_headers(self):
@@ -80,6 +94,13 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
         # --- API Endpoints ---
         if path == '/api/questions':
             self.send_json_response(200, read_db().get("questions", []))
+            return
+        
+        elif path == '/api/info':
+            self.send_json_response(200, {
+                "localIp": get_local_ip(),
+                "port": self.server.server_address[1]
+            })
             return
         
         elif path == '/api/results':

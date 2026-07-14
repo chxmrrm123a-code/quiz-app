@@ -67,6 +67,8 @@ function initElements() {
   el.adminLeaderboardBody = document.getElementById('admin-leaderboard-body');
   el.statTotalPlayers = document.getElementById('stat-total-players');
   el.statAvgScore = document.getElementById('stat-avg-score');
+  el.adminQrCode = document.getElementById('admin-qr-code');
+  el.adminLocalUrl = document.getElementById('admin-local-url');
 }
 
 // ==========================================================================
@@ -170,10 +172,45 @@ function stopPolling() {
   }
 }
 
+let qrCodeInstance = null;
+
+async function setupQrCode() {
+  try {
+    const res = await fetch(`${API_BASE}/api/info`);
+    if (!res.ok) throw new Error('Failed to fetch API info');
+    const info = await res.json();
+    
+    const ip = info.localIp || '127.0.0.1';
+    const port = info.port || 8000;
+    
+    // If running on localhost, use the retrieved local IP so other devices can access it!
+    const targetUrl = ip !== '127.0.0.1' ? `http://${ip}:${port}` : window.location.origin;
+
+    if (el.adminLocalUrl) {
+      el.adminLocalUrl.textContent = targetUrl;
+    }
+    
+    if (el.adminQrCode) {
+      el.adminQrCode.innerHTML = ''; // Clear previous
+      qrCodeInstance = new QRCode(el.adminQrCode, {
+        text: targetUrl,
+        width: 128,
+        height: 128,
+        colorDark: '#0f172a',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.H
+      });
+    }
+  } catch (error) {
+    console.error('Error setting up QR Code:', error);
+  }
+}
+
 // Refresh state on start or tab change
 async function refreshState() {
   await fetchQuestions();
   await fetchResults();
+  await setupQrCode();
 
   // If user has a nickname saved in session, check if they are registered/submitted
   if (state.nickname) {
