@@ -1777,21 +1777,22 @@ function showStudentDetailModal(p) {
     const userAns = p.answers && p.answers[q.id] !== undefined ? p.answers[q.id] : '';
     const userAnsStr = userAns !== '' ? String(userAns).trim() : t('detail_unanswered');
     
-    // Determine the current grade (1.0, 0.5, 0.0)
+    // Determine the current grade (1.0 to 0.0)
     const isCorrectExact = userAns !== '' && String(userAns).trim().toLowerCase() === String(q.correctAnswer).trim().toLowerCase();
     const currentGrade = p.grades && p.grades[q.id] !== undefined ? p.grades[q.id] : (isCorrectExact ? 1.0 : 0.0);
     
     let ansRowClass = 'incorrect';
     let ansRowIcon = 'x-circle';
     let gradeLabel = '0%';
+    
     if (Math.abs(currentGrade - 1.0) < 0.01) {
       ansRowClass = 'correct';
       ansRowIcon = 'check-circle';
       gradeLabel = '100%';
-    } else if (Math.abs(currentGrade - 0.5) < 0.01) {
+    } else if (currentGrade > 0.0) {
       ansRowClass = 'partial';
       ansRowIcon = 'alert-circle';
-      gradeLabel = '50%';
+      gradeLabel = `${Math.round(currentGrade * 100)}%`;
     }
     
     const userAnsRow = document.createElement('div');
@@ -1820,14 +1821,15 @@ function showStudentDetailModal(p) {
       qCard.appendChild(correctRow);
     }
     
-    // Teacher manual override button group
-    const btnGroup = document.createElement('div');
-    btnGroup.style.display = 'flex';
-    btnGroup.style.gap = '0.4rem';
-    btnGroup.style.marginTop = '0.5rem';
-    btnGroup.style.justifyContent = 'flex-end';
+    // Teacher manual override controls
+    const controlsRow = document.createElement('div');
+    controlsRow.style.display = 'flex';
+    controlsRow.style.gap = '0.4rem';
+    controlsRow.style.marginTop = '0.5rem';
+    controlsRow.style.justifyContent = 'flex-end';
+    controlsRow.style.alignItems = 'center';
     
-    const createGradeBtn = (label, val, activeColor) => {
+    const createPresetBtn = (label, val, activeColor) => {
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.style.padding = '0.2rem 0.5rem';
@@ -1864,14 +1866,54 @@ function showStudentDetailModal(p) {
       return btn;
     };
     
-    const btnCorrect = createGradeBtn(state.currentLang === 'ko' ? '정답 (1.0)' : (state.currentLang === 'vi' ? 'Đúng (1.0)' : 'Correct (1.0)'), 1.0, '#10b981');
-    const btnPartial = createGradeBtn(state.currentLang === 'ko' ? '부분 (0.5)' : (state.currentLang === 'vi' ? 'Một phần (0.5)' : 'Partial (0.5)'), 0.5, '#f59e0b');
-    const btnIncorrect = createGradeBtn(state.currentLang === 'ko' ? '오답 (0.0)' : (state.currentLang === 'vi' ? 'Sai (0.0)' : 'Incorrect (0.0)'), 0.0, '#ef4444');
+    const btnCorrect = createPresetBtn(state.currentLang === 'ko' ? '정답 (1.0)' : (state.currentLang === 'vi' ? 'Đúng (1.0)' : 'Correct (1.0)'), 1.0, '#10b981');
+    const btnIncorrect = createPresetBtn(state.currentLang === 'ko' ? '오답 (0.0)' : (state.currentLang === 'vi' ? 'Sai (0.0)' : 'Incorrect (0.0)'), 0.0, '#ef4444');
     
-    btnGroup.appendChild(btnCorrect);
-    btnGroup.appendChild(btnPartial);
-    btnGroup.appendChild(btnIncorrect);
-    qCard.appendChild(btnGroup);
+    // Direct input box for custom partial score
+    const inputLabel = document.createElement('label');
+    inputLabel.style.fontSize = '0.72rem';
+    inputLabel.style.color = 'var(--text-muted)';
+    inputLabel.textContent = state.currentLang === 'ko' ? '점수:' : (state.currentLang === 'vi' ? 'Điểm:' : 'Score:');
+    
+    const scoreInput = document.createElement('input');
+    scoreInput.type = 'number';
+    scoreInput.min = '0.0';
+    scoreInput.max = '1.0';
+    scoreInput.step = '0.1';
+    scoreInput.value = Number(currentGrade).toString();
+    scoreInput.style.width = '55px';
+    scoreInput.style.height = '24px';
+    scoreInput.style.textAlign = 'center';
+    scoreInput.style.background = 'rgba(0,0,0,0.2)';
+    scoreInput.style.border = '1px solid var(--border-color)';
+    scoreInput.style.borderRadius = 'var(--radius-sm)';
+    scoreInput.style.color = 'var(--text-light)';
+    scoreInput.style.fontSize = '0.75rem';
+    scoreInput.style.fontWeight = 'bold';
+    
+    scoreInput.addEventListener('change', async (e) => {
+      e.stopPropagation();
+      let val = parseFloat(scoreInput.value);
+      if (isNaN(val) || val < 0.0 || val > 1.0) {
+        alert(state.currentLang === 'ko' ? "0.0에서 1.0 사이의 값을 입력하세요." : "Please enter a value between 0.0 and 1.0.");
+        scoreInput.value = Number(currentGrade).toString();
+        return;
+      }
+      val = Math.round(val * 100) / 100;
+      await overrideGrade(p.nickname, q.id, val);
+      await fetchResults();
+      const updatedP = state.results.find(resP => resP.nickname.toLowerCase() === p.nickname.toLowerCase());
+      if (updatedP) {
+        showStudentDetailModal(updatedP);
+      }
+    });
+    
+    controlsRow.appendChild(btnCorrect);
+    controlsRow.appendChild(btnIncorrect);
+    controlsRow.appendChild(inputLabel);
+    controlsRow.appendChild(scoreInput);
+    
+    qCard.appendChild(controlsRow);
     
     el.modalStudentAnswersList.appendChild(qCard);
   });
