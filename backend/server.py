@@ -5,12 +5,19 @@ import re
 import urllib.parse
 import socket
 import random
+import threading
+from functools import wraps
 from datetime import datetime, timedelta
 
 # Define base paths
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, 'data', 'db.json')
 FRONTEND_DIR = os.path.abspath(os.path.join(BASE_DIR, '..', 'frontend'))
+
+# The built-in server handles requests on multiple threads. Keep each
+# read-modify-write request together so concurrent student updates cannot
+# overwrite one another.
+DB_LOCK = threading.RLock()
 
 DEFAULT_QUESTIONS = [
     {
@@ -49,23 +56,47 @@ if not os.path.exists(DB_PATH):
 
 
 def read_db():
-    try:
-        with open(DB_PATH, 'r', encoding='utf-8') as f:
-            db = json.load(f)
-            if "rooms" not in db:
-                db["rooms"] = {}
-            return db
-    except Exception as e:
-        print(f"Error reading database: {e}")
-        return {"rooms": {}}
+    with DB_LOCK:
+        try:
+            with open(DB_PATH, 'r', encoding='utf-8') as f:
+                db = json.load(f)
+                if "rooms" not in db:
+                    db["rooms"] = {}
+                return db
+        except Exception as e:
+            print(f"Error reading database: {e}")
+            return {"rooms": {}}
 
 
 def write_db(data):
-    try:
-        with open(DB_PATH, 'w', encoding='utf-8') as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
-    except Exception as e:
-        print(f"Error writing database: {e}")
+    with DB_LOCK:
+        temp_path = f"{DB_PATH}.{os.getpid()}.{threading.get_ident()}.tmp"
+        try:
+            # Write a complete JSON document beside the database, then swap it
+            # into place atomically. Readers never observe a half-written file.
+            with open(temp_path, 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent=2, ensure_ascii=False)
+                f.flush()
+                os.fsync(f.fileno())
+            os.replace(temp_path, DB_PATH)
+        except Exception as e:
+            print(f"Error writing database: {e}")
+            raise
+        finally:
+            if os.path.exists(temp_path):
+                try:
+                    os.remove(temp_path)
+                except OSError:
+                    pass
+
+
+def serialize_db_writes(handler_method):
+    """Serialize mutating HTTP requests for the single-process JSON store."""
+    @wraps(handler_method)
+    def wrapped(self, *args, **kwargs):
+        with DB_LOCK:
+            return handler_method(self, *args, **kwargs)
+    return wrapped
 
 
 def get_local_ip():
@@ -92,10 +123,14 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
         self.send_response(204)
         self.end_headers()
 
+    def is_valid_admin_pin(self, pin_to_check):
+        raw_pins = os.environ.get('ADMIN_PIN', '1234')
+        allowed_pins = [p.strip() for p in raw_pins.replace(',', ';').split(';')]
+        return pin_to_check in allowed_pins
+
     def check_admin_auth(self):
         auth_pin = self.headers.get('X-Admin-PIN', '')
-        correct_pin = os.environ.get('ADMIN_PIN', '1234')
-        if auth_pin != correct_pin:
+        if not self.is_valid_admin_pin(auth_pin):
             self.send_error_response(401, "인증 실패: 잘못된 PIN 번호입니다.")
             return False
         return True
@@ -157,8 +192,7 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
                 return
 
             auth_pin = self.headers.get('X-Admin-PIN', '')
-            correct_pin = os.environ.get('ADMIN_PIN', '1234')
-            is_admin = (auth_pin == correct_pin)
+            is_admin = self.is_valid_admin_pin(auth_pin)
 
             participants = room.get("participants", [])
             
@@ -217,6 +251,7 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
                 else:
                     self.send_error_response(404, "File Not Found")
 
+    @serialize_db_writes
     def do_POST(self):
         parsed_url = urllib.parse.urlparse(self.path)
         path = parsed_url.path
@@ -233,8 +268,7 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
         # Check Admin credentials
         if path == '/api/admin/auth':
             pin = body.get('pin', '').strip()
-            correct_pin = os.environ.get('ADMIN_PIN', '1234')
-            if pin == correct_pin:
+            if self.is_valid_admin_pin(pin):
                 self.send_json_response(200, {"success": True, "token": "admin-authorized"})
             else:
                 self.send_error_response(401, "잘못된 PIN 번호입니다.")
@@ -618,6 +652,7 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
         else:
             self.send_error_response(404, "Not Found")
 
+    @serialize_db_writes
     def do_PUT(self):
         if not self.check_admin_auth(): return
 
@@ -672,6 +707,7 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
         
         self.send_error_response(404, "Not Found")
 
+    @serialize_db_writes
     def do_DELETE(self):
         if not self.check_admin_auth(): return
 

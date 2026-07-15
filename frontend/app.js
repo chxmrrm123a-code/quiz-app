@@ -628,6 +628,19 @@ function t(key) {
   return translations[state.currentLang][key] || key;
 }
 
+// Values originating from quiz data or participants must be escaped before
+// they are inserted into an HTML template. Most other dynamic UI uses
+// textContent already; this helper protects the few template-based sections.
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, (char) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  })[char]);
+}
+
 function applyLanguage(lang) {
   state.currentLang = lang;
   localStorage.setItem('quiz_lang', lang);
@@ -1700,7 +1713,7 @@ function renderAdminQuestions() {
 
     const corr = document.createElement('div');
     corr.className = 'admin-question-correct text-emerald';
-    corr.innerHTML = `<i data-lucide="check-circle-2"></i> ${t('q_preview_correct')}: <strong>${q.correctAnswer}</strong>`;
+    corr.innerHTML = `<i data-lucide="check-circle-2"></i> ${t('q_preview_correct')}: <strong>${escapeHtml(q.correctAnswer)}</strong>`;
     item.appendChild(corr);
 
     // Calculate Correct Rate Statistics
@@ -1797,7 +1810,7 @@ function renderLeaderboards() {
       if (isCurrentUser) studentRow.style.backgroundColor = 'rgba(99, 102, 241, 0.08)';
       studentRow.innerHTML = `
         <td>${rankBadge}</td>
-        <td><strong>${p.nickname}</strong> ${isCurrentUser ? `<span class="text-gold">(${state.currentLang === 'ko' ? '나' : (state.currentLang === 'vi' ? 'Tôi' : 'You')})</span>` : ''}</td>
+        <td><strong>${escapeHtml(p.nickname)}</strong> ${isCurrentUser ? `<span class="text-gold">(${state.currentLang === 'ko' ? '나' : (state.currentLang === 'vi' ? 'Tôi' : 'You')})</span>` : ''}</td>
         <td>${Number(p.correctCount).toString()} / ${p.totalCount}</td>
         <td><span class="text-emerald" style="font-weight: 800;">${p.score}${t('score_label')}</span></td>
         <td style="color: var(--text-muted); font-size: 0.8rem;">${timeStr}</td>
@@ -1859,7 +1872,7 @@ function renderLeaderboards() {
 
     adminRow.innerHTML = `
       <td>${rankBadge}</td>
-      <td><strong>${p.nickname}</strong></td>
+      <td><strong>${escapeHtml(p.nickname)}</strong></td>
       <td>${statusBadge}</td>
       <td>${scoreText}</td>
       <td><span class="${switchClass}">${switches}</span></td>
@@ -1940,7 +1953,7 @@ function showStudentDetailModal(p) {
     icon.style.height = '16px';
     
     const textSpan = document.createElement('span');
-    textSpan.innerHTML = `${t('detail_user_ans')}: <strong>${userAnsStr}</strong> (${gradeLabel})`;
+    textSpan.innerHTML = `${t('detail_user_ans')}: <strong>${escapeHtml(userAnsStr)}</strong> (${gradeLabel})`;
     
     userAnsRow.appendChild(icon);
     userAnsRow.appendChild(textSpan);
@@ -1953,7 +1966,7 @@ function showStudentDetailModal(p) {
       correctRow.style.color = '#34d399';
       correctRow.style.paddingLeft = '0.5rem';
       correctRow.style.marginTop = '0.2rem';
-      correctRow.innerHTML = `<i data-lucide="check" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i>${t('detail_correct_ans')}: <strong>${q.correctAnswer}</strong>`;
+      correctRow.innerHTML = `<i data-lucide="check" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i>${t('detail_correct_ans')}: <strong>${escapeHtml(q.correctAnswer)}</strong>`;
       qCard.appendChild(correctRow);
     }
     
