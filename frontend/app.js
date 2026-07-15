@@ -1221,7 +1221,7 @@ async function handleQuestionSubmit(e) {
 
   const type = el.qType.value;
   const questionText = el.qText.value.trim();
-  const correctAnswer = el.qCorrect.value.trim();
+  let correctAnswer = el.qCorrect.value.trim();
   
   let options = [];
   if (type === 'multiple-choice') {
@@ -1238,6 +1238,20 @@ async function handleQuestionSubmit(e) {
     const opt5 = document.getElementById('opt-4').value.trim();
     if (opt5) {
       options.push(opt5);
+    }
+
+    // Resolve index input (1-5 or A-E) to the actual option text
+    const valLower = correctAnswer.toLowerCase();
+    let optIdx = -1;
+    if (correctAnswer.match(/^[1-5]$/)) {
+      optIdx = parseInt(correctAnswer) - 1;
+    } else if (valLower.match(/^[a-e]$/)) {
+      optIdx = valLower.charCodeAt(0) - 97;
+    }
+
+    if (optIdx >= 0 && optIdx < options.length) {
+      correctAnswer = options[optIdx];
+      el.qCorrect.value = correctAnswer; // Update UI for visual confirmation
     }
   }
 
