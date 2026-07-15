@@ -431,6 +431,8 @@ function initElements() {
   el.viewAdminLogin = document.getElementById('view-admin-login');
   el.viewAdminRoomSelect = document.getElementById('view-admin-room-select');
   el.viewAdmin = document.getElementById('view-admin');
+  el.waitInfoBox = document.getElementById('wait-info-box');
+  el.waitInfoText = document.getElementById('wait-info-text');
   
   // Forms
   el.joinForm = document.getElementById('join-form');
@@ -845,6 +847,7 @@ async function checkExamStateAndProceed() {
 
     if (state.examState === 'locked') {
       showView('view-wait');
+      updateLobbyStatus(data); // Update lobby status information!
       stopQuizTimer();
       startExamStateCheck();
     } else {
@@ -872,6 +875,8 @@ function startExamStateCheck() {
         showView('view-quiz');
         startCheatingDetection(); // Enable cheating prevention when quiz unlocks!
         startQuizTimer(data.examEndTime); // Start timer countdown!
+      } else {
+        updateLobbyStatus(data); // Keep lobby status updated!
       }
     } catch (e) {
       console.error(e);
@@ -883,6 +888,28 @@ function stopExamStateCheck() {
   if (state.examStateInterval) {
     clearInterval(state.examStateInterval);
     state.examStateInterval = null;
+  }
+}
+
+function updateLobbyStatus(data) {
+  if (!el.waitInfoBox || !el.waitInfoText) return;
+  if (data && data.questionCount > 0) {
+    const qCount = data.questionCount;
+    const tLimit = data.timeLimit || 0;
+    
+    let text = "";
+    if (state.currentLang === 'ko') {
+      text = `⏱️ 총 ${qCount}문항 출제됨 ${tLimit > 0 ? `(제한시간: ${tLimit}분)` : '(제한시간 없음)'}`;
+    } else if (state.currentLang === 'vi') {
+      text = `⏱️ Tổng số ${qCount} câu hỏi ${tLimit > 0 ? `(Thời gian: ${tLimit} phút)` : '(Không giới hạn)'}`;
+    } else {
+      text = `⏱️ Total ${qCount} questions ${tLimit > 0 ? `(Time Limit: ${tLimit}m)` : '(No Time Limit)'}`;
+    }
+    
+    el.waitInfoText.textContent = text;
+    el.waitInfoBox.classList.remove('hidden');
+  } else {
+    el.waitInfoBox.classList.add('hidden');
   }
 }
 

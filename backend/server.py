@@ -135,12 +135,13 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
             db = read_db()
             room = db.get("rooms", {}).get(room_code)
             if not room:
-                self.send_json_response(200, {"examState": "locked", "timeLimit": 0, "examEndTime": None})
+                self.send_json_response(200, {"examState": "locked", "timeLimit": 0, "examEndTime": None, "questionCount": 0})
                 return
             self.send_json_response(200, {
                 "examState": room.get("examState", "locked"),
                 "timeLimit": room.get("timeLimit", 0),
-                "examEndTime": room.get("examEndTime", None)
+                "examEndTime": room.get("examEndTime", None),
+                "questionCount": len(room.get("questions", []))
             })
             return
         
