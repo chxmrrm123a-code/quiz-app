@@ -122,12 +122,44 @@
             <!-- Dynamic Questions Rendered via JS -->
           </div>
           
-          <div class="quiz-actions">
+          <!-- Navigation bar for slide-by-slide -->
+          <div id="quiz-nav-bar" class="quiz-nav-bar hidden" style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; margin-bottom: 1.5rem; gap: 1rem;">
+            <button type="button" id="btn-prev-q" class="btn btn-secondary" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.3rem; height: 42px;">
+              <i data-lucide="arrow-left" style="width:16px; height:16px;"></i> <span data-i18n="nav_prev">이전 문제</span>
+            </button>
+            <span id="quiz-q-indicator" style="font-weight: bold; font-size: 1.05rem; color: var(--text-light); min-width: 65px; text-align: center; background: rgba(255,255,255,0.04); padding: 0.4rem 0.8rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">1 / 1</span>
+            <button type="button" id="btn-next-q" class="btn btn-primary" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.3rem; height: 42px;">
+              <span data-i18n="nav_next">다음 문제</span> <i data-lucide="arrow-right" style="width:16px; height:16px;"></i>
+            </button>
+          </div>
+          
+          <div class="quiz-actions" id="quiz-submit-container">
             <button type="submit" class="btn btn-emerald btn-lg btn-block">
               <span data-i18n="quiz_submit_btn">답안 제출하기</span> <i data-lucide="send"></i>
             </button>
           </div>
         </form>
+        
+        <style>
+          @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+          }
+          @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+          }
+          .student-question-slide {
+            display: none;
+          }
+          .student-question-slide.slide-active {
+            display: block !important;
+            animation: slideInRight 0.25s ease-out;
+          }
+          .student-question-slide.slide-active.slide-prev-direction {
+            animation: slideInLeft 0.25s ease-out;
+          }
+        </style>
       </section>
 
       <!-- ================= STUDENT: SCORE VIEW ================= -->

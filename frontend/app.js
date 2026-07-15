@@ -41,6 +41,8 @@ const translations = {
     wait_desc: "선생님이 시험을 시작하실 때까지 대기해 주세요. 시작 시 자동으로 화면이 전환됩니다.",
     timer_label: "남은 시간:",
     modal_detail_title: "답안 상세 내역",
+    nav_prev: "이전 문제",
+    nav_next: "다음 문제",
     btn_close: "닫기",
     stats_correct_rate: "정답률",
     stats_correct_rate_empty: "정답률: - (제출 없음)",
@@ -166,6 +168,8 @@ const translations = {
     wait_desc: "Vui lòng đợi giáo viên bắt đầu bài thi. Màn hình sẽ tự động chuyển khi bắt đầu.",
     timer_label: "Thời gian còn lại:",
     modal_detail_title: "Chi tiết bài làm",
+    nav_prev: "Câu trước",
+    nav_next: "Câu sau",
     btn_close: "Đóng",
     stats_correct_rate: "Tỉ lệ đúng",
     stats_correct_rate_empty: "Tỉ lệ đúng: - (Chưa nộp)",
@@ -291,6 +295,8 @@ const translations = {
     wait_desc: "Please wait until the teacher starts the exam. The screen will automatically transition when started.",
     timer_label: "Time Remaining:",
     modal_detail_title: "Detailed Answers",
+    nav_prev: "Previous",
+    nav_next: "Next",
     btn_close: "Close",
     stats_correct_rate: "Correct Rate",
     stats_correct_rate_empty: "Correct Rate: - (No submissions)",
@@ -398,7 +404,9 @@ let state = {
   adminToken: sessionStorage.getItem('admin_token') || null, // PIN string if authenticated
   examState: 'locked', // 'locked' | 'active'
   tabSwitches: 0,
-  examStateInterval: null
+  examStateInterval: null,
+  currentQuestionIdx: 0,
+  slideDirection: 'next'
 };
 
 // ==========================================================================
@@ -437,6 +445,12 @@ function initElements() {
   el.adminTimerInput = document.getElementById('admin-timer-input');
   el.quizTimerBanner = document.getElementById('quiz-timer-banner');
   el.timerCountdown = document.getElementById('timer-countdown');
+  
+  el.quizNavBar = document.getElementById('quiz-nav-bar');
+  el.btnPrevQ = document.getElementById('btn-prev-q');
+  el.btnNextQ = document.getElementById('btn-next-q');
+  el.quizQIndicator = document.getElementById('quiz-q-indicator');
+  el.quizSubmitContainer = document.getElementById('quiz-submit-container');
   
   el.studentDetailModal = document.getElementById('student-detail-modal');
   el.modalStudentName = document.getElementById('modal-student-name');
@@ -579,6 +593,26 @@ function setupEventListeners() {
     el.studentDetailModal.addEventListener('click', (e) => {
       if (e.target === el.studentDetailModal) {
         el.studentDetailModal.classList.add('hidden');
+      }
+    });
+  }
+
+  // Slide question navigation
+  if (el.btnPrevQ) {
+    el.btnPrevQ.addEventListener('click', () => {
+      if (state.currentQuestionIdx > 0) {
+        state.slideDirection = 'prev';
+        state.currentQuestionIdx--;
+        updateQuizSliderView();
+      }
+    });
+  }
+  if (el.btnNextQ) {
+    el.btnNextQ.addEventListener('click', () => {
+      if (state.currentQuestionIdx < state.questions.length - 1) {
+        state.slideDirection = 'next';
+        state.currentQuestionIdx++;
+        updateQuizSliderView();
       }
     });
   }
@@ -1397,15 +1431,22 @@ function renderStudentQuiz() {
         <p style="color: var(--text-muted);">${t('q_preview_empty_desc')}</p>
       </div>
     `;
+    if (el.quizNavBar) el.quizNavBar.classList.add('hidden');
+    if (el.quizSubmitContainer) el.quizSubmitContainer.classList.add('hidden');
     lucide.createIcons();
     updateProgressBar();
     return;
   }
 
+  // Ensure index is within bounds
+  if (state.currentQuestionIdx >= state.questions.length) {
+    state.currentQuestionIdx = 0;
+  }
+
   state.questions.forEach((q, idx) => {
     const qCard = document.createElement('div');
-    qCard.className = 'card question-card';
-    qCard.style.animationDelay = `${idx * 0.05}s`;
+    qCard.className = 'card question-card student-question-slide';
+    qCard.style.animationDelay = '0s'; // Reset delay for slider
 
     // Number Badge
     const badge = document.createElement('span');
@@ -1488,8 +1529,44 @@ function renderStudentQuiz() {
     el.questionsContainer.appendChild(qCard);
   });
 
+  // Enable slider UI
+  if (el.quizNavBar) el.quizNavBar.classList.remove('hidden');
+  updateQuizSliderView();
   updateProgressBar();
   lucide.createIcons();
+}
+
+function updateQuizSliderView() {
+  const slides = el.questionsContainer.querySelectorAll('.student-question-slide');
+  if (slides.length === 0) return;
+  
+  slides.forEach((slide, idx) => {
+    slide.classList.remove('slide-active', 'slide-prev-direction');
+    if (idx === state.currentQuestionIdx) {
+      slide.classList.add('slide-active');
+      if (state.slideDirection === 'prev') {
+        slide.classList.add('slide-prev-direction');
+      }
+    }
+  });
+
+  // Update indicators
+  if (el.quizQIndicator) {
+    el.quizQIndicator.textContent = `${state.currentQuestionIdx + 1} / ${state.questions.length}`;
+  }
+
+  // Update buttons state
+  if (el.btnPrevQ) {
+    el.btnPrevQ.disabled = (state.currentQuestionIdx === 0);
+  }
+
+  if (state.currentQuestionIdx === state.questions.length - 1) {
+    if (el.btnNextQ) el.btnNextQ.classList.add('hidden');
+    if (el.quizSubmitContainer) el.quizSubmitContainer.classList.remove('hidden');
+  } else {
+    if (el.btnNextQ) el.btnNextQ.classList.remove('hidden');
+    if (el.quizSubmitContainer) el.quizSubmitContainer.classList.add('hidden');
+  }
 }
 
 // 2. Render Admin Questions List
