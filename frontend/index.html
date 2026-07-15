@@ -428,7 +428,10 @@
           </div>
 
           <div class="live-leaderboard-section">
-            <h4 data-i18n="live_status_title">실시간 응시 현황 및 랭킹</h4>
+            <h4 style="display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.8rem;">
+              <span data-i18n="live_status_title">실시간 응시 현황 및 랭킹</span>
+              <span id="admin-hardest-q" style="font-size: 0.75rem; font-weight: 700; color: #ef4444; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); padding: 0.25rem 0.6rem; border-radius: var(--radius-sm); display: none;">-</span>
+            </h4>
             <div class="leaderboard-table-wrapper">
               <table class="leaderboard-table">
                 <thead>

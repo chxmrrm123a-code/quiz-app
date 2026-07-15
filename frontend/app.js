@@ -433,6 +433,7 @@ function initElements() {
   el.viewAdmin = document.getElementById('view-admin');
   el.waitInfoBox = document.getElementById('wait-info-box');
   el.waitInfoText = document.getElementById('wait-info-text');
+  el.statHardestQ = document.getElementById('admin-hardest-q');
   
   // Forms
   el.joinForm = document.getElementById('join-form');
@@ -2086,12 +2087,57 @@ function updateAdminStats() {
 
   if (total === 0) {
     if (el.statAvgScore) el.statAvgScore.textContent = '0%';
+    if (el.statHardestQ) el.statHardestQ.style.display = 'none';
     return;
   }
 
-  const sum = state.results.reduce((acc, curr) => acc + curr.score, 0);
-  const avg = Math.round(sum / total);
-  if (el.statAvgScore) el.statAvgScore.textContent = `${avg}%`;
+  // Calculate Average Score of completed participants
+  const completedParticipants = state.results.filter(p => p.score !== null);
+  if (completedParticipants.length > 0) {
+    const sum = completedParticipants.reduce((acc, curr) => acc + (curr.score || 0), 0);
+    const avg = Math.round(sum / completedParticipants.length);
+    if (el.statAvgScore) el.statAvgScore.textContent = `${avg}%`;
+  } else {
+    if (el.statAvgScore) el.statAvgScore.textContent = '0%';
+  }
+
+  // Calculate Hardest Question
+  if (completedParticipants.length > 0 && state.questions.length > 0 && el.statHardestQ) {
+    let hardestQIdx = -1;
+    let lowestRate = 101; // higher than 100%
+
+    state.questions.forEach((q, idx) => {
+      let correctCount = 0;
+      completedParticipants.forEach(p => {
+        const isCorrectExact = p.answers && p.answers[q.id] !== undefined && String(p.answers[q.id]).trim().toLowerCase() === String(q.correctAnswer).trim().toLowerCase();
+        const currentGrade = p.grades && p.grades[q.id] !== undefined ? p.grades[q.id] : (isCorrectExact ? 1.0 : 0.0);
+        correctCount += currentGrade;
+      });
+      const rate = (correctCount / completedParticipants.length) * 100;
+      if (rate < lowestRate) {
+        lowestRate = rate;
+        hardestQIdx = idx;
+      }
+    });
+
+    if (hardestQIdx !== -1 && lowestRate < 100) {
+      const errRate = Math.round(100 - lowestRate);
+      let label = "";
+      if (state.currentLang === 'ko') {
+        label = `🔥 가장 많이 틀린 문제: Q${hardestQIdx + 1} (오답률 ${errRate}%)`;
+      } else if (state.currentLang === 'vi') {
+        label = `🔥 Câu sai nhiều nhất: Q${hardestQIdx + 1} (Tỉ lệ sai ${errRate}%)`;
+      } else {
+        label = `🔥 Hardest Question: Q${hardestQIdx + 1} (${errRate}% Incorrect)`;
+      }
+      el.statHardestQ.textContent = label;
+      el.statHardestQ.style.display = 'inline-block';
+    } else {
+      el.statHardestQ.style.display = 'none';
+    }
+  } else {
+    if (el.statHardestQ) el.statHardestQ.style.display = 'none';
+  }
 }
 
 // ==========================================================================
