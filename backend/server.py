@@ -333,6 +333,7 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
                 "totalCount": None,
                 "submittedAt": None,
                 "answers": {},
+                "grades": {},
                 "tabSwitches": 0
             }
             db["rooms"][room_code]["participants"].append(new_participant)
@@ -366,15 +367,20 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
                 return
 
             questions = rooms[room_code].get("questions", [])
-            score_count = 0
+            score_count = 0.0
             total_count = len(questions)
+            grades = {}
 
             for q in questions:
                 q_id = q["id"]
                 user_ans = str(answers.get(q_id, "")).strip().lower()
-                corr_ans = str(q["correctAnswer"]).strip().lower()
-                if user_ans == corr_ans:
-                    score_count += 1
+                # Split synonyms by comma or semicolon
+                corr_ans_list = [ans.strip().lower() for ans in str(q["correctAnswer"]).replace(";", ",").split(",")]
+                if user_ans in corr_ans_list:
+                    grades[q_id] = 1.0
+                    score_count += 1.0
+                else:
+                    grades[q_id] = 0.0
 
             percentage_score = round((score_count / total_count) * 100) if total_count > 0 else 0
 
@@ -383,6 +389,7 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
             db["rooms"][room_code]["participants"][user_idx]["totalCount"] = total_count
             db["rooms"][room_code]["participants"][user_idx]["submittedAt"] = datetime.utcnow().isoformat() + "Z"
             db["rooms"][room_code]["participants"][user_idx]["answers"] = answers
+            db["rooms"][room_code]["participants"][user_idx]["grades"] = grades
             db["rooms"][room_code]["participants"][user_idx]["tabSwitches"] = tab_switches
             write_db(db)
 
@@ -489,6 +496,70 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
                 "examState": state_val,
                 "timeLimit": db["rooms"][room_code]["timeLimit"],
                 "examEndTime": db["rooms"][room_code]["examEndTime"]
+            })
+            return
+
+        # Override a participant's score for a specific question (Admin)
+        elif path == '/api/grade/override':
+            if not self.check_admin_auth(): return
+
+            room_code = str(body.get('roomCode', '')).strip()
+            nickname = body.get('nickname', '').strip()
+            question_id = str(body.get('questionId', '')).strip()
+            grade_value = float(body.get('grade', 0.0)) # 1.0, 0.5, 0.0
+
+            if not room_code or not nickname or not question_id:
+                self.send_error_response(400, "roomCode, nickname, and questionId are required")
+                return
+
+            db = read_db()
+            if room_code not in db.get("rooms", {}):
+                self.send_error_response(404, "Room not found")
+                return
+
+            participants = db["rooms"][room_code].get("participants", [])
+            user_idx = next((i for i, p in enumerate(participants) if p["nickname"].lower() == nickname.lower()), -1)
+            if user_idx == -1:
+                self.send_error_response(404, "Participant not found")
+                return
+
+            p = participants[user_idx]
+            
+            # Backwards compatibility populate grades if missing
+            grades = p.get("grades", {})
+            if not grades:
+                questions = db["rooms"][room_code].get("questions", [])
+                grades = {}
+                for q in questions:
+                    q_id = q["id"]
+                    user_ans = str(p.get("answers", {}).get(q_id, "")).strip().lower()
+                    corr_ans_list = [ans.strip().lower() for ans in str(q["correctAnswer"]).replace(";", ",").split(",")]
+                    if user_ans in corr_ans_list:
+                        grades[q_id] = 1.0
+                    else:
+                        grades[q_id] = 0.0
+            
+            # Update the override
+            grades[question_id] = grade_value
+            p["grades"] = grades
+            
+            # Recalculate sums
+            score_count = sum(grades.values())
+            total_count = len(db["rooms"][room_code].get("questions", []))
+            percentage_score = round((score_count / total_count) * 100) if total_count > 0 else 0
+            
+            p["score"] = percentage_score
+            p["correctCount"] = score_count
+            p["totalCount"] = total_count
+            
+            db["rooms"][room_code]["participants"][user_idx] = p
+            write_db(db)
+            
+            self.send_json_response(200, {
+                "success": True, 
+                "score": percentage_score, 
+                "correctCount": score_count, 
+                "totalCount": total_count
             })
             return
 

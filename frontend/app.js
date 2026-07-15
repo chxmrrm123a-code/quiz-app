@@ -1670,7 +1670,7 @@ function renderLeaderboards() {
       studentRow.innerHTML = `
         <td>${rankBadge}</td>
         <td><strong>${p.nickname}</strong> ${isCurrentUser ? `<span class="text-gold">(${state.currentLang === 'ko' ? '나' : (state.currentLang === 'vi' ? 'Tôi' : 'You')})</span>` : ''}</td>
-        <td>${p.correctCount} / ${p.totalCount}</td>
+        <td>${Number(p.correctCount).toString()} / ${p.totalCount}</td>
         <td><span class="text-emerald" style="font-weight: 800;">${p.score}${t('score_label')}</span></td>
         <td style="color: var(--text-muted); font-size: 0.8rem;">${timeStr}</td>
       `;
@@ -1705,7 +1705,7 @@ function renderLeaderboards() {
       : `<span class="status-badge status-pending" style="background: rgba(99, 102, 241, 0.1); color: var(--primary); padding: 0.2rem 0.5rem; border-radius: var(--radius-sm); font-size: 0.75rem; border: 1px solid rgba(99, 102, 241, 0.2); font-weight: 600;">${state.currentLang === 'ko' ? '진행 중' : (state.currentLang === 'vi' ? 'Đang thi' : 'In Progress')}</span>`;
 
     const scoreText = isCompleted
-      ? `<span style="font-weight: 700;">${p.score}%</span> (${p.correctCount}/${p.totalCount})`
+      ? `<span style="font-weight: 700;">${p.score}%</span> (${Number(p.correctCount).toString()}/${p.totalCount})`
       : `-`;
 
     const adminRow = document.createElement('tr');
@@ -1776,25 +1776,41 @@ function showStudentDetailModal(p) {
     // User answer
     const userAns = p.answers && p.answers[q.id] !== undefined ? p.answers[q.id] : '';
     const userAnsStr = userAns !== '' ? String(userAns).trim() : t('detail_unanswered');
-    const isCorrect = userAns !== '' && String(userAns).trim().toLowerCase() === String(q.correctAnswer).trim().toLowerCase();
+    
+    // Determine the current grade (1.0, 0.5, 0.0)
+    const isCorrectExact = userAns !== '' && String(userAns).trim().toLowerCase() === String(q.correctAnswer).trim().toLowerCase();
+    const currentGrade = p.grades && p.grades[q.id] !== undefined ? p.grades[q.id] : (isCorrectExact ? 1.0 : 0.0);
+    
+    let ansRowClass = 'incorrect';
+    let ansRowIcon = 'x-circle';
+    let gradeLabel = '0%';
+    if (Math.abs(currentGrade - 1.0) < 0.01) {
+      ansRowClass = 'correct';
+      ansRowIcon = 'check-circle';
+      gradeLabel = '100%';
+    } else if (Math.abs(currentGrade - 0.5) < 0.01) {
+      ansRowClass = 'partial';
+      ansRowIcon = 'alert-circle';
+      gradeLabel = '50%';
+    }
     
     const userAnsRow = document.createElement('div');
-    userAnsRow.className = `modal-ans-row ${isCorrect ? 'correct' : 'incorrect'}`;
+    userAnsRow.className = `modal-ans-row ${ansRowClass}`;
     
     const icon = document.createElement('i');
-    icon.setAttribute('data-lucide', isCorrect ? 'check-circle' : 'x-circle');
+    icon.setAttribute('data-lucide', ansRowIcon);
     icon.style.width = '16px';
     icon.style.height = '16px';
     
     const textSpan = document.createElement('span');
-    textSpan.innerHTML = `${t('detail_user_ans')}: <strong>${userAnsStr}</strong>`;
+    textSpan.innerHTML = `${t('detail_user_ans')}: <strong>${userAnsStr}</strong> (${gradeLabel})`;
     
     userAnsRow.appendChild(icon);
     userAnsRow.appendChild(textSpan);
     qCard.appendChild(userAnsRow);
     
-    // If incorrect, show correct answer
-    if (!isCorrect) {
+    // If not fully correct, show correct answer reference
+    if (Math.abs(currentGrade - 1.0) >= 0.01) {
       const correctRow = document.createElement('div');
       correctRow.style.fontSize = '0.85rem';
       correctRow.style.color = '#34d399';
@@ -1804,11 +1820,86 @@ function showStudentDetailModal(p) {
       qCard.appendChild(correctRow);
     }
     
+    // Teacher manual override button group
+    const btnGroup = document.createElement('div');
+    btnGroup.style.display = 'flex';
+    btnGroup.style.gap = '0.4rem';
+    btnGroup.style.marginTop = '0.5rem';
+    btnGroup.style.justifyContent = 'flex-end';
+    
+    const createGradeBtn = (label, val, activeColor) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.style.padding = '0.2rem 0.5rem';
+      btn.style.fontSize = '0.72rem';
+      btn.style.borderRadius = 'var(--radius-sm)';
+      btn.style.border = '1px solid var(--border-color)';
+      btn.style.cursor = 'pointer';
+      btn.style.transition = 'all 0.2s';
+      
+      const isSelected = Math.abs(currentGrade - val) < 0.01;
+      if (isSelected) {
+        btn.style.background = activeColor;
+        btn.style.color = '#ffffff';
+        btn.style.borderColor = activeColor;
+        btn.style.fontWeight = 'bold';
+      } else {
+        btn.style.background = 'rgba(255, 255, 255, 0.04)';
+        btn.style.color = 'var(--text-muted)';
+        btn.style.borderColor = 'var(--border-color)';
+      }
+      
+      btn.textContent = label;
+      
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        await overrideGrade(p.nickname, q.id, val);
+        await fetchResults();
+        const updatedP = state.results.find(resP => resP.nickname.toLowerCase() === p.nickname.toLowerCase());
+        if (updatedP) {
+          showStudentDetailModal(updatedP);
+        }
+      });
+      
+      return btn;
+    };
+    
+    const btnCorrect = createGradeBtn(state.currentLang === 'ko' ? '정답 (1.0)' : (state.currentLang === 'vi' ? 'Đúng (1.0)' : 'Correct (1.0)'), 1.0, '#10b981');
+    const btnPartial = createGradeBtn(state.currentLang === 'ko' ? '부분 (0.5)' : (state.currentLang === 'vi' ? 'Một phần (0.5)' : 'Partial (0.5)'), 0.5, '#f59e0b');
+    const btnIncorrect = createGradeBtn(state.currentLang === 'ko' ? '오답 (0.0)' : (state.currentLang === 'vi' ? 'Sai (0.0)' : 'Incorrect (0.0)'), 0.0, '#ef4444');
+    
+    btnGroup.appendChild(btnCorrect);
+    btnGroup.appendChild(btnPartial);
+    btnGroup.appendChild(btnIncorrect);
+    qCard.appendChild(btnGroup);
+    
     el.modalStudentAnswersList.appendChild(qCard);
   });
   
   el.studentDetailModal.classList.remove('hidden');
   lucide.createIcons();
+}
+
+async function overrideGrade(nickname, questionId, gradeValue) {
+  try {
+    const res = await fetch(`${API_BASE}/api/grade/override`, {
+      method: 'POST',
+      headers: getAdminHeaders(),
+      body: JSON.stringify({
+        roomCode: state.roomCode,
+        nickname: nickname,
+        questionId: questionId,
+        grade: gradeValue
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      alert(data.error || "성적 수정 실패");
+    }
+  } catch (error) {
+    console.error("Error overriding grade:", error);
+    alert("서버 연결 실패");
+  }
 }
 
 // 4. Update Stats Box in Admin
