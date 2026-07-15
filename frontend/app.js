@@ -811,6 +811,7 @@ async function checkExamStateAndProceed() {
       startExamStateCheck();
     } else {
       stopExamStateCheck();
+      await fetchQuestions(); // Fetch the questions and render them!
       showView('view-quiz');
       startCheatingDetection(); // Enable cheating prevention when quiz starts!
       startQuizTimer(data.examEndTime); // Start timer countdown!
@@ -829,6 +830,7 @@ function startExamStateCheck() {
       const data = await res.json();
       if (data.examState === 'active') {
         stopExamStateCheck();
+        await fetchQuestions(); // Fetch the questions and render them!
         showView('view-quiz');
         startCheatingDetection(); // Enable cheating prevention when quiz unlocks!
         startQuizTimer(data.examEndTime); // Start timer countdown!
