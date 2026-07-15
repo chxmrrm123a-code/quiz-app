@@ -5,12 +5,20 @@ import re
 import urllib.parse
 import socket
 import random
-from datetime import datetime, timedelta
+import threading
+from functools import wraps
+from datetime import datetime, timedelta, timezone
 
 # Define base paths
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, 'data', 'db.json')
 FRONTEND_DIR = os.path.abspath(os.path.join(BASE_DIR, '..', 'frontend'))
+
+# The built-in server handles requests on multiple threads. Keep each
+# read-modify-write request together so concurrent student updates cannot
+# overwrite one another.
+DB_LOCK = threading.RLock()
+SUBMIT_GRACE_SECONDS = 10
 
 DEFAULT_QUESTIONS = [
     {
@@ -49,23 +57,47 @@ if not os.path.exists(DB_PATH):
 
 
 def read_db():
-    try:
-        with open(DB_PATH, 'r', encoding='utf-8') as f:
-            db = json.load(f)
-            if "rooms" not in db:
-                db["rooms"] = {}
-            return db
-    except Exception as e:
-        print(f"Error reading database: {e}")
-        return {"rooms": {}}
+    with DB_LOCK:
+        try:
+            with open(DB_PATH, 'r', encoding='utf-8') as f:
+                db = json.load(f)
+                if "rooms" not in db:
+                    db["rooms"] = {}
+                return db
+        except Exception as e:
+            print(f"Error reading database: {e}")
+            return {"rooms": {}}
 
 
 def write_db(data):
-    try:
-        with open(DB_PATH, 'w', encoding='utf-8') as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
-    except Exception as e:
-        print(f"Error writing database: {e}")
+    with DB_LOCK:
+        temp_path = f"{DB_PATH}.{os.getpid()}.{threading.get_ident()}.tmp"
+        try:
+            # Write a complete JSON document beside the database, then swap it
+            # into place atomically. Readers never observe a half-written file.
+            with open(temp_path, 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent=2, ensure_ascii=False)
+                f.flush()
+                os.fsync(f.fileno())
+            os.replace(temp_path, DB_PATH)
+        except Exception as e:
+            print(f"Error writing database: {e}")
+            raise
+        finally:
+            if os.path.exists(temp_path):
+                try:
+                    os.remove(temp_path)
+                except OSError:
+                    pass
+
+
+def serialize_db_writes(handler_method):
+    """Serialize mutating HTTP requests for the single-process JSON store."""
+    @wraps(handler_method)
+    def wrapped(self, *args, **kwargs):
+        with DB_LOCK:
+            return handler_method(self, *args, **kwargs)
+    return wrapped
 
 
 def get_local_ip():
@@ -116,9 +148,22 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
             db = read_db()
             room = db.get("rooms", {}).get(room_code)
             if not room:
-                self.send_json_response(200, []) # Return empty if room doesn't exist yet
+                self.send_error_response(404, "존재하지 않는 방 번호입니다.")
                 return
-            self.send_json_response(200, room.get("questions", []))
+
+            questions = room.get("questions", [])
+            auth_pin = self.headers.get('X-Admin-PIN', '')
+            correct_pin = os.environ.get('ADMIN_PIN', '1234')
+            if auth_pin == correct_pin:
+                self.send_json_response(200, questions)
+            else:
+                # Students receive only the fields needed to render the quiz.
+                # Grading remains entirely on the server.
+                public_questions = [
+                    {key: value for key, value in question.items() if key != "correctAnswer"}
+                    for question in questions
+                ]
+                self.send_json_response(200, public_questions)
             return
         
         elif path == '/api/info':
@@ -217,6 +262,7 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
                 else:
                     self.send_error_response(404, "File Not Found")
 
+    @serialize_db_writes
     def do_POST(self):
         parsed_url = urllib.parse.urlparse(self.path)
         path = parsed_url.path
@@ -392,14 +438,34 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
                 self.send_error_response(404, "존재하지 않는 방 번호입니다.")
                 return
 
-            participants = rooms[room_code].get("participants", [])
+            room = rooms[room_code]
+            if room.get("examState", "locked") != "active":
+                self.send_error_response(409, "시험이 아직 시작되지 않았거나 이미 잠겼습니다.")
+                return
+
+            exam_end_time = room.get("examEndTime")
+            if exam_end_time:
+                try:
+                    end_time = datetime.fromisoformat(exam_end_time.replace("Z", "+00:00"))
+                    if end_time.tzinfo is None:
+                        end_time = end_time.replace(tzinfo=timezone.utc)
+                except (TypeError, ValueError):
+                    self.send_error_response(500, "시험 종료 시간 설정이 올바르지 않습니다.")
+                    return
+
+                deadline = end_time + timedelta(seconds=SUBMIT_GRACE_SECONDS)
+                if datetime.now(timezone.utc) > deadline:
+                    self.send_error_response(409, "시험 제출 시간이 종료되었습니다.")
+                    return
+
+            participants = room.get("participants", [])
             user_idx = next((i for i, p in enumerate(participants) if p["nickname"].lower() == nickname.lower()), -1)
             
             if user_idx == -1:
                 self.send_error_response(404, "등록되지 않은 참가자입니다. 먼저 입장해 주세요.")
                 return
 
-            questions = rooms[room_code].get("questions", [])
+            questions = room.get("questions", [])
             score_count = 0.0
             total_count = len(questions)
             grades = {}
@@ -618,6 +684,7 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
         else:
             self.send_error_response(404, "Not Found")
 
+    @serialize_db_writes
     def do_PUT(self):
         if not self.check_admin_auth(): return
 
@@ -672,6 +739,7 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
         
         self.send_error_response(404, "Not Found")
 
+    @serialize_db_writes
     def do_DELETE(self):
         if not self.check_admin_auth(): return
 

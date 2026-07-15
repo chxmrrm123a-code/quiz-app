@@ -32,5 +32,129 @@
     }
   ],
   "participants": [],
-  "examState": "locked"
+  "examState": "locked",
+  "rooms": {
+    "9730": {
+      "questions": [
+        {
+          "id": "q1",
+          "type": "multiple-choice",
+          "questionText": "대한민국의 수도는 어디인가요?",
+          "options": [
+            "부산",
+            "인천",
+            "서울",
+            "대구"
+          ],
+          "correctAnswer": "서울",
+          "imageUrl": null
+        },
+        {
+          "id": "q2",
+          "type": "short-answer",
+          "questionText": "인터넷 브라우저에서 웹페이지를 구조화하는 데 사용되는 기본 마크업 언어의 약자(영어 4글자)는 무엇인가요?",
+          "correctAnswer": "HTML",
+          "imageUrl": null
+        },
+        {
+          "id": "q3",
+          "type": "multiple-choice",
+          "questionText": "다음 중 자바스크립트(JavaScript)의 기본 데이터 타입이 아닌 것은 무엇인가요?",
+          "options": [
+            "Number",
+            "String",
+            "Boolean",
+            "Class"
+          ],
+          "correctAnswer": "Class",
+          "imageUrl": null
+        }
+      ],
+      "participants": [
+        {
+          "nickname": "테스트학생",
+          "score": 67,
+          "correctCount": 2.0,
+          "totalCount": 3,
+          "submittedAt": "2026-07-15T08:03:21.605823Z",
+          "answers": {
+            "q1": "서울",
+            "q2": "html",
+            "q3": "Class"
+          },
+          "grades": {
+            "q1": 1.0,
+            "q2": 0.0,
+            "q3": 1.0
+          },
+          "tabSwitches": 0
+        }
+      ],
+      "examState": "active",
+      "timeLimit": 0,
+      "examEndTime": null,
+      "createdAt": "2026-07-15T08:01:31.969782Z"
+    },
+    "2358": {
+      "questions": [
+        {
+          "id": "q1",
+          "type": "multiple-choice",
+          "questionText": "대한민국의 수도는 어디인가요?",
+          "options": [
+            "부산",
+            "인천",
+            "서울",
+            "대구"
+          ],
+          "correctAnswer": "서울",
+          "imageUrl": null
+        },
+        {
+          "id": "q2",
+          "type": "short-answer",
+          "questionText": "인터넷 브라우저에서 웹페이지를 구조화하는 데 사용되는 기본 마크업 언어의 약자(영어 4글자)는 무엇인가요?",
+          "correctAnswer": "HTML",
+          "imageUrl": null
+        },
+        {
+          "id": "q3",
+          "type": "multiple-choice",
+          "questionText": "다음 중 자바스크립트(JavaScript)의 기본 데이터 타입이 아닌 것은 무엇인가요?",
+          "options": [
+            "Number",
+            "String",
+            "Boolean",
+            "Class"
+          ],
+          "correctAnswer": "Class",
+          "imageUrl": null
+        }
+      ],
+      "participants": [
+        {
+          "nickname": "<img src=x onerror=document.documentElement.dataset.xss=1>",
+          "score": 67,
+          "correctCount": 2.0,
+          "totalCount": 3,
+          "submittedAt": "2026-07-15T08:22:29.843248Z",
+          "answers": {
+            "q1": "서울",
+            "q2": "<img src=x onerror=document.documentElement.dataset.xssAnswer=1>",
+            "q3": "Class"
+          },
+          "grades": {
+            "q1": 1.0,
+            "q2": 0.0,
+            "q3": 1.0
+          },
+          "tabSwitches": 0
+        }
+      ],
+      "examState": "locked",
+      "timeLimit": 0,
+      "examEndTime": null,
+      "createdAt": "2026-07-15T08:22:29.684949Z"
+    }
+  }
 }

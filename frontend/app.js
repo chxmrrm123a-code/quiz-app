@@ -10,7 +10,7 @@ const translations = {
     nickname_placeholder: "멋진 닉네임을 입력하세요 (예: 퀴즈천재)",
     join_btn: "입장하기",
     quiz_profile_label: "참가자",
-    quiz_progress_label: "남은 문제",
+    quiz_progress_label: "응답한 문제",
     quiz_submit_btn: "답안 제출하기",
     score_title: "퀴즈 제출 완료!",
     score_desc: "수고하셨습니다. 제출된 답안이 채점되었습니다.",
@@ -137,7 +137,7 @@ const translations = {
     nickname_placeholder: "Nhập một biệt danh thú vị (Ví dụ: Thiên tài đố vui)",
     join_btn: "Vào phòng thi",
     quiz_profile_label: "Thí sinh",
-    quiz_progress_label: "Câu hỏi còn lại",
+    quiz_progress_label: "Đã trả lời",
     quiz_submit_btn: "Nộp bài làm",
     score_title: "Đã nộp bài thành công!",
     score_desc: "Cảm ơn bạn. Bài làm của bạn đã được chấm điểm.",
@@ -264,7 +264,7 @@ const translations = {
     nickname_placeholder: "Enter an awesome nickname (e.g. QuizGenius)",
     join_btn: "Join Arena",
     quiz_profile_label: "Participant",
-    quiz_progress_label: "Remaining",
+    quiz_progress_label: "Answered",
     quiz_submit_btn: "Submit Answers",
     score_title: "Quiz Submitted!",
     score_desc: "Thank you. Your answers have been graded.",
@@ -628,6 +628,46 @@ function t(key) {
   return translations[state.currentLang][key] || key;
 }
 
+// Values originating from quiz data or participants must be escaped before
+// they are inserted into an HTML template. Most other dynamic UI uses
+// textContent already; this helper protects the few template-based sections.
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, (char) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  })[char]);
+}
+
+function formatTime(value) {
+  if (!value) return '-';
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return '-';
+
+  const locale = state.currentLang === 'ko'
+    ? 'ko-KR'
+    : (state.currentLang === 'vi' ? 'vi-VN' : 'en-US');
+  const options = { hour: '2-digit', minute: '2-digit', second: '2-digit' };
+  if (state.currentLang !== 'en') options.hour12 = false;
+  return date.toLocaleTimeString(locale, options);
+}
+
+function getCurrentUserResult() {
+  if (!state.nickname) return null;
+  return state.results.find(
+    participant => participant.nickname.toLowerCase() === state.nickname.toLowerCase()
+  ) || null;
+}
+
+function updateScoreSummary(result) {
+  if (!result) return;
+  el.scorePercentage.textContent = result.score ?? 0;
+  el.scoreCorrectCount.textContent = `${result.correctCount ?? 0} / ${result.totalCount ?? 0}`;
+  el.scoreSubmitTime.textContent = formatTime(result.submittedAt);
+}
+
 function applyLanguage(lang) {
   state.currentLang = lang;
   localStorage.setItem('quiz_lang', lang);
@@ -670,6 +710,8 @@ function applyLanguage(lang) {
   }
   renderLeaderboards();
   updateAdminStats();
+  const currentResult = getCurrentUserResult();
+  if (currentResult) updateScoreSummary(currentResult);
   updateExamToggleButtonUI();
 }
 
@@ -684,9 +726,10 @@ function switchTab(tab) {
     
     if (state.nickname && state.roomCode) {
       // Check if user already submitted answers
-      const alreadySubmitted = state.results.some(p => p.nickname.toLowerCase() === state.nickname.toLowerCase());
-      if (alreadySubmitted) {
+      const submittedResult = getCurrentUserResult();
+      if (submittedResult) {
         stopQuizTimer();
+        updateScoreSummary(submittedResult);
         showView('view-score');
         startResultsPolling();
       } else {
@@ -1088,11 +1131,14 @@ async function handleEnterRoom(e) {
 
   try {
     // Verify room existence by fetching its questions
-    const res = await fetch(`${API_BASE}/api/questions?roomCode=${code}`);
+    const res = await fetch(`${API_BASE}/api/questions?roomCode=${code}`, {
+      headers: { 'X-Admin-PIN': state.adminToken || '' }
+    });
     if (res.status === 404) {
       alert(t('alert_room_not_found'));
       return;
     }
+    if (!res.ok) throw new Error('Failed to verify room');
 
     state.roomCode = code;
     sessionStorage.setItem('quiz_room_code', code);
@@ -1106,7 +1152,10 @@ async function handleEnterRoom(e) {
 // Fetch Questions
 async function fetchQuestions() {
   try {
-    const res = await fetch(`${API_BASE}/api/questions?roomCode=${state.roomCode}`);
+    const headers = state.activeTab === 'admin' && state.adminToken
+      ? { 'X-Admin-PIN': state.adminToken }
+      : {};
+    const res = await fetch(`${API_BASE}/api/questions?roomCode=${state.roomCode}`, { headers });
     if (!res.ok) throw new Error('Failed to fetch questions');
     state.questions = await res.json();
     
@@ -1138,6 +1187,7 @@ async function fetchResults() {
     
     renderLeaderboards();
     updateAdminStats();
+    if (state.activeTab === 'admin') updateAdminQuestionStats();
   } catch (error) {
     console.error('Error fetching results:', error);
   }
@@ -1227,12 +1277,13 @@ async function handleQuizSubmit(e, isAutoSubmit = false) {
     }
 
     await fetchResults();
-    
-    el.scorePercentage.textContent = data.score;
-    el.scoreCorrectCount.textContent = `${data.correctCount} / ${data.totalCount}`;
-    
-    const timeString = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    el.scoreSubmitTime.textContent = timeString;
+    const submittedResult = getCurrentUserResult();
+    updateScoreSummary(submittedResult || {
+      score: data.score,
+      correctCount: data.correctCount,
+      totalCount: data.totalCount,
+      submittedAt: new Date()
+    });
     
     showView('view-score');
     triggerConfetti(); // Trigger the beautiful celebration confetti!
@@ -1618,6 +1669,58 @@ function updateQuizSliderView() {
   reportProgress();
 }
 
+function buildQuestionStatsHtml(q) {
+  const submittedParticipants = state.results.filter(p => p.score !== null);
+  const totalSubmitted = submittedParticipants.length;
+
+  if (totalSubmitted === 0) {
+    return `<span style="font-size: 0.78rem; font-weight: 500; color: var(--text-muted);"><i data-lucide="info" style="width: 12px; height: 12px; display: inline-block; vertical-align: middle; margin-right: 3px;"></i>${t('stats_correct_rate_empty')}</span>`;
+  }
+
+  let correctCount = 0;
+  submittedParticipants.forEach(p => {
+    const savedGrade = p.grades && p.grades[q.id];
+    if (savedGrade !== undefined) {
+      if (Number(savedGrade) >= 1) correctCount++;
+      return;
+    }
+
+    const userAns = p.answers && p.answers[q.id];
+    const acceptedAnswers = String(q.correctAnswer)
+      .replace(/;/g, ',')
+      .split(',')
+      .map(answer => answer.trim().toLowerCase());
+    if (userAns && acceptedAnswers.includes(String(userAns).trim().toLowerCase())) {
+      correctCount++;
+    }
+  });
+
+  const rate = Math.round((correctCount / totalSubmitted) * 100);
+  let rateColor = '#ef4444';
+  if (rate >= 70) {
+    rateColor = '#10b981';
+  } else if (rate >= 40) {
+    rateColor = '#f59e0b';
+  }
+
+  const formatStr = t('stats_correct_rate_format')
+    .replace('{rate}', rate)
+    .replace('{total}', totalSubmitted)
+    .replace('{correct}', correctCount);
+
+  return `<span style="font-size: 0.78rem; font-weight: 700; color: ${rateColor}; display: flex; align-items: center; gap: 0.3rem;"><i data-lucide="pie-chart" style="width: 13px; height: 13px;"></i>${formatStr}</span>`;
+}
+
+function updateAdminQuestionStats() {
+  if (!el.adminQuestionsList) return;
+  const questionById = new Map(state.questions.map(question => [question.id, question]));
+  el.adminQuestionsList.querySelectorAll('.admin-question-stats').forEach(container => {
+    const question = questionById.get(container.dataset.questionId);
+    if (question) container.innerHTML = buildQuestionStatsHtml(question);
+  });
+  lucide.createIcons();
+}
+
 // 2. Render Admin Questions List
 function renderAdminQuestions() {
   el.adminQuestionsList.innerHTML = '';
@@ -1700,48 +1803,18 @@ function renderAdminQuestions() {
 
     const corr = document.createElement('div');
     corr.className = 'admin-question-correct text-emerald';
-    corr.innerHTML = `<i data-lucide="check-circle-2"></i> ${t('q_preview_correct')}: <strong>${q.correctAnswer}</strong>`;
+    corr.innerHTML = `<i data-lucide="check-circle-2"></i> ${t('q_preview_correct')}: <strong>${escapeHtml(q.correctAnswer)}</strong>`;
     item.appendChild(corr);
 
-    // Calculate Correct Rate Statistics
-    const submittedParticipants = state.results.filter(p => p.score !== null);
-    const totalSubmitted = submittedParticipants.length;
-    let statsHtml = '';
-    
-    if (totalSubmitted === 0) {
-      statsHtml = `<span style="font-size: 0.78rem; font-weight: 500; color: var(--text-muted);"><i data-lucide="info" style="width: 12px; height: 12px; display: inline-block; vertical-align: middle; margin-right: 3px;"></i>${t('stats_correct_rate_empty')}</span>`;
-    } else {
-      let correctCount = 0;
-      submittedParticipants.forEach(p => {
-        const userAns = p.answers && p.answers[q.id];
-        if (userAns && String(userAns).trim().toLowerCase() === String(q.correctAnswer).trim().toLowerCase()) {
-          correctCount++;
-        }
-      });
-      const rate = Math.round((correctCount / totalSubmitted) * 100);
-      
-      let rateColor = '#ef4444'; // Red
-      if (rate >= 70) {
-        rateColor = '#10b981'; // Green
-      } else if (rate >= 40) {
-        rateColor = '#f59e0b'; // Orange
-      }
-      
-      const formatStr = t('stats_correct_rate_format')
-        .replace('{rate}', rate)
-        .replace('{total}', totalSubmitted)
-        .replace('{correct}', correctCount);
-        
-      statsHtml = `<span style="font-size: 0.78rem; font-weight: 700; color: ${rateColor}; display: flex; align-items: center; gap: 0.3rem;"><i data-lucide="pie-chart" style="width: 13px; height: 13px;"></i>${formatStr}</span>`;
-    }
-    
     const statsContainer = document.createElement('div');
+    statsContainer.className = 'admin-question-stats';
+    statsContainer.dataset.questionId = q.id;
     statsContainer.style.marginTop = '0.5rem';
     statsContainer.style.padding = '0.4rem 0.6rem';
     statsContainer.style.background = 'rgba(255, 255, 255, 0.02)';
     statsContainer.style.border = '1px dashed var(--border-color)';
     statsContainer.style.borderRadius = 'var(--radius-sm)';
-    statsContainer.innerHTML = statsHtml;
+    statsContainer.innerHTML = buildQuestionStatsHtml(q);
     item.appendChild(statsContainer);
 
     el.adminQuestionsList.appendChild(item);
@@ -1790,14 +1863,13 @@ function renderLeaderboards() {
       else if (rank === 3) rankBadgeClass = 'rank-3';
 
       const rankBadge = `<span class="rank-badge ${rankBadgeClass}">${rank}</span>`;
-      const time = new Date(p.submittedAt);
-      const timeStr = time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const timeStr = formatTime(p.submittedAt);
 
       const studentRow = document.createElement('tr');
       if (isCurrentUser) studentRow.style.backgroundColor = 'rgba(99, 102, 241, 0.08)';
       studentRow.innerHTML = `
         <td>${rankBadge}</td>
-        <td><strong>${p.nickname}</strong> ${isCurrentUser ? `<span class="text-gold">(${state.currentLang === 'ko' ? '나' : (state.currentLang === 'vi' ? 'Tôi' : 'You')})</span>` : ''}</td>
+        <td><strong>${escapeHtml(p.nickname)}</strong> ${isCurrentUser ? `<span class="text-gold">(${state.currentLang === 'ko' ? '나' : (state.currentLang === 'vi' ? 'Tôi' : 'You')})</span>` : ''}</td>
         <td>${Number(p.correctCount).toString()} / ${p.totalCount}</td>
         <td><span class="text-emerald" style="font-weight: 800;">${p.score}${t('score_label')}</span></td>
         <td style="color: var(--text-muted); font-size: 0.8rem;">${timeStr}</td>
@@ -1819,8 +1891,7 @@ function renderLeaderboards() {
     const isCompleted = p.score !== null;
     let timeStr = '-';
     if (isCompleted && p.submittedAt) {
-      const time = new Date(p.submittedAt);
-      timeStr = time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      timeStr = formatTime(p.submittedAt);
     }
 
     const switches = p.tabSwitches || 0;
@@ -1859,7 +1930,7 @@ function renderLeaderboards() {
 
     adminRow.innerHTML = `
       <td>${rankBadge}</td>
-      <td><strong>${p.nickname}</strong></td>
+      <td><strong>${escapeHtml(p.nickname)}</strong></td>
       <td>${statusBadge}</td>
       <td>${scoreText}</td>
       <td><span class="${switchClass}">${switches}</span></td>
@@ -1940,7 +2011,7 @@ function showStudentDetailModal(p) {
     icon.style.height = '16px';
     
     const textSpan = document.createElement('span');
-    textSpan.innerHTML = `${t('detail_user_ans')}: <strong>${userAnsStr}</strong> (${gradeLabel})`;
+    textSpan.innerHTML = `${t('detail_user_ans')}: <strong>${escapeHtml(userAnsStr)}</strong> (${gradeLabel})`;
     
     userAnsRow.appendChild(icon);
     userAnsRow.appendChild(textSpan);
@@ -1953,7 +2024,7 @@ function showStudentDetailModal(p) {
       correctRow.style.color = '#34d399';
       correctRow.style.paddingLeft = '0.5rem';
       correctRow.style.marginTop = '0.2rem';
-      correctRow.innerHTML = `<i data-lucide="check" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i>${t('detail_correct_ans')}: <strong>${q.correctAnswer}</strong>`;
+      correctRow.innerHTML = `<i data-lucide="check" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i>${t('detail_correct_ans')}: <strong>${escapeHtml(q.correctAnswer)}</strong>`;
       qCard.appendChild(correctRow);
     }
     
