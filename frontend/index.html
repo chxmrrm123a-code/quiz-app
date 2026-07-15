@@ -281,14 +281,35 @@
       <section id="view-admin" class="view-section admin-grid">
         
         <!-- Left: Question Creator & Manager -->
-        <div class="card admin-column">
+        <div class="card admin-column" id="admin-questions-panel">
           <div class="card-header">
             <h3>
               <i data-lucide="file-edit" class="text-indigo"></i> <span data-i18n="admin_title">시험 문제 출제 & 편집</span>
               <span class="badge" style="background: var(--primary); font-size: 0.85rem; padding: 0.3rem 0.6rem; border-radius: var(--radius-sm); margin-left: 0.8rem; letter-spacing: 0.05em;">Room: <span id="display-room-code">-</span></span>
             </h3>
-            
             <div class="admin-actions">
+              <!-- Collapse button to hide list -->
+              <button id="btn-collapse-questions" class="btn btn-secondary btn-sm hidden" type="button" style="display: flex; align-items: center; gap: 0.3rem;">
+                <i data-lucide="eye-off" style="width:14px; height:14px;"></i> <span data-i18n="btn_hide_questions">숨기기</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Prevent exposure placeholder -->
+          <div id="admin-questions-placeholder" style="display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 5rem 2rem; text-align: center; gap: 1rem; flex: 1;">
+            <div style="background: rgba(99, 102, 241, 0.05); border: 1px solid rgba(99, 102, 241, 0.15); color: var(--primary); border-radius: 50%; width: 70px; height: 70px; display: flex; align-items: center; justify-content: center;">
+              <i data-lucide="eye-off" style="width: 35px; height: 35px;"></i>
+            </div>
+            <h4 style="color: var(--text-light); font-weight: bold; margin: 0; font-size: 1.1rem;" data-i18n="lobby_exposure_prevented">문제 노출 방지 모드 활성화됨</h4>
+            <p style="color: var(--text-muted); font-size: 0.85rem; max-width: 320px; margin: 0 0 0.5rem 0;" data-i18n="lobby_exposure_desc">스크린 노출을 방지하기 위해 시험지가 숨겨졌습니다.</p>
+            <button type="button" id="btn-toggle-questions-show" class="btn btn-primary" style="display: flex; align-items: center; gap: 0.3rem; height: 38px;">
+              <i data-lucide="eye" style="width: 14px; height: 14px;"></i> <span data-i18n="btn_show_questions">문제 편집기 열기</span>
+            </button>
+          </div>
+
+          <!-- Main Questions Content (Initially Hidden) -->
+          <div id="admin-questions-content" class="hidden" style="display: flex; flex-direction: column; gap: 1.5rem; height: 100%;">
+            <div class="admin-actions" style="display: flex; gap: 0.5rem; justify-content: flex-end; flex-wrap: wrap;">
               <button id="btn-export-questions" class="btn btn-secondary btn-sm" data-i18n-title="admin_export_btn_title" title="문제지를 백업 파일로 내보내기">
                 <i data-lucide="download"></i> <span data-i18n="btn_export">내보내기</span>
               </button>
@@ -301,85 +322,85 @@
                 <i data-lucide="plus"></i> <span data-i18n="admin_new_btn">새 문제 추가</span>
               </button>
             </div>
-          </div>
 
-          <!-- Question Edit Form -->
-          <div id="question-form-container" class="question-edit-form hidden">
-            <h4 id="question-form-title" data-i18n="admin_form_new">새 문제 추가</h4>
-            <form id="question-editor-form">
-              <input type="hidden" id="edit-question-id">
-              
-              <div class="input-group">
-                <label for="q-text" data-i18n="q_text_label">질문 내용</label>
-                <textarea id="q-text" rows="3" data-i18n-placeholder="q_text_placeholder" placeholder="질문을 입력하세요" required></textarea>
-              </div>
-
-              <div class="input-group">
-                <label for="q-image-file" data-i18n="q_image_label">문제 이미지 (선택사항)</label>
-                <input type="file" id="q-image-file" accept="image/*">
+            <!-- Question Edit Form -->
+            <div id="question-form-container" class="question-edit-form hidden">
+              <h4 id="question-form-title" data-i18n="admin_form_new">새 문제 추가</h4>
+              <form id="question-editor-form">
+                <input type="hidden" id="edit-question-id">
                 
-                <!-- Preview container -->
-                <div id="q-image-preview-container" class="image-upload-preview hidden">
-                  <img id="q-image-preview" src="" data-i18n-alt="q_image_preview_alt" alt="Image preview">
-                  <button type="button" id="btn-remove-image" class="btn-remove-img" data-i18n-title="btn_remove_img_title" title="이미지 삭제">
-                    <i data-lucide="x" style="width: 14px; height: 14px;"></i>
-                  </button>
+                <div class="input-group">
+                  <label for="q-text" data-i18n="q_text_label">질문 내용</label>
+                  <textarea id="q-text" rows="3" data-i18n-placeholder="q_text_placeholder" placeholder="질문을 입력하세요" required></textarea>
                 </div>
-              </div>
 
-              <div class="input-group">
-                <label for="q-type" data-i18n="q_type_label">문제 유형</label>
-                <select id="q-type" required>
-                  <option value="multiple-choice" data-i18n="q_type_mcq">객관식 (선택형)</option>
-                  <option value="short-answer" data-i18n="q_type_sa">주관식 (단답형)</option>
-                </select>
-              </div>
+                <div class="input-group">
+                  <label for="q-image-file" data-i18n="q_image_label">문제 이미지 (선택사항)</label>
+                  <input type="file" id="q-image-file" accept="image/*">
+                  
+                  <!-- Preview container -->
+                  <div id="q-image-preview-container" class="image-upload-preview hidden">
+                    <img id="q-image-preview" src="" data-i18n-alt="q_image_preview_alt" alt="Image preview">
+                    <button type="button" id="btn-remove-image" class="btn-remove-img" data-i18n-title="btn_remove_img_title" title="이미지 삭제">
+                      <i data-lucide="x" style="width: 14px; height: 14px;"></i>
+                    </button>
+                  </div>
+                </div>
 
-              <!-- Options Container (Only for multiple choice) -->
-              <div id="mcq-options-container" class="options-edit-block">
-                <label data-i18n="q_options_label">보기 설정 (4지선다)</label>
-                <div class="option-input-row">
-                  <span class="opt-num">1</span>
-                  <input type="text" id="opt-0" placeholder="A" required>
+                <div class="input-group">
+                  <label for="q-type" data-i18n="q_type_label">문제 유형</label>
+                  <select id="q-type" required>
+                    <option value="multiple-choice" data-i18n="q_type_mcq">객관식 (선택형)</option>
+                    <option value="short-answer" data-i18n="q_type_sa">주관식 (단답형)</option>
+                  </select>
                 </div>
-                <div class="option-input-row">
-                  <span class="opt-num">2</span>
-                  <input type="text" id="opt-1" placeholder="B" required>
-                </div>
-                <div class="option-input-row">
-                  <span class="opt-num">3</span>
-                  <input type="text" id="opt-2" placeholder="C" required>
-                </div>
-                <div class="option-input-row">
-                  <span class="opt-num">4</span>
-                  <input type="text" id="opt-3" placeholder="D" required>
-                </div>
-                <div class="option-input-row" style="display: flex; gap: 0.5rem; align-items: center;">
-                  <span class="opt-num">5</span>
-                  <input type="text" id="opt-4" placeholder="E" style="flex: 1;">
-                  <button type="button" id="btn-clear-opt5" class="btn btn-secondary btn-sm" style="padding: 0 0.8rem; height: 38px; display: flex; align-items: center; justify-content: center; gap: 0.3rem;" title="5번 보기 비우기">
-                    <i data-lucide="x-circle" style="width: 16px; height: 16px;"></i> <span data-i18n="btn_clear">비우기</span>
-                  </button>
-                </div>
-              </div>
 
-              <div class="input-group">
-                <label for="q-correct" data-i18n="q_correct_label">정답</label>
-                <input type="text" id="q-correct" data-i18n-placeholder="q_correct_placeholder" placeholder="정답을 입력하세요" required>
-              </div>
+                <!-- Options Container (Only for multiple choice) -->
+                <div id="mcq-options-container" class="options-edit-block">
+                  <label data-i18n="q_options_label">보기 설정 (4지선다)</label>
+                  <div class="option-input-row">
+                    <span class="opt-num">1</span>
+                    <input type="text" id="opt-0" placeholder="A" required>
+                  </div>
+                  <div class="option-input-row">
+                    <span class="opt-num">2</span>
+                    <input type="text" id="opt-1" placeholder="B" required>
+                  </div>
+                  <div class="option-input-row">
+                    <span class="opt-num">3</span>
+                    <input type="text" id="opt-2" placeholder="C" required>
+                  </div>
+                  <div class="option-input-row">
+                    <span class="opt-num">4</span>
+                    <input type="text" id="opt-3" placeholder="D" required>
+                  </div>
+                  <div class="option-input-row" style="display: flex; gap: 0.5rem; align-items: center;">
+                    <span class="opt-num">5</span>
+                    <input type="text" id="opt-4" placeholder="E" style="flex: 1;">
+                    <button type="button" id="btn-clear-opt5" class="btn btn-secondary btn-sm" style="padding: 0 0.8rem; height: 38px; display: flex; align-items: center; justify-content: center; gap: 0.3rem;" title="5번 보기 비우기">
+                      <i data-lucide="x-circle" style="width: 16px; height: 16px;"></i> <span data-i18n="btn_clear">비우기</span>
+                    </button>
+                  </div>
+                </div>
 
-              <div class="form-buttons">
-                <button type="button" id="btn-cancel-edit" class="btn btn-secondary"><span data-i18n="btn_cancel">취소</span></button>
-                <button type="submit" class="btn btn-primary"><span data-i18n="btn_save">저장하기</span></button>
-              </div>
-            </form>
-          </div>
+                <div class="input-group">
+                  <label for="q-correct" data-i18n="q_correct_label">정답</label>
+                  <input type="text" id="q-correct" data-i18n-placeholder="q_correct_placeholder" placeholder="정답을 입력하세요" required>
+                </div>
 
-          <!-- Existing Questions List -->
-          <div class="questions-manager-list">
-            <h4><span data-i18n="admin_list_title">등록된 문제 목록</span> (<span id="admin-questions-count">0</span>)</h4>
-            <div id="admin-questions-list" class="admin-questions-scroll">
-              <!-- Rendered via JS -->
+                <div class="form-buttons">
+                  <button type="button" id="btn-cancel-edit" class="btn btn-secondary"><span data-i18n="btn_cancel">취소</span></button>
+                  <button type="submit" class="btn btn-primary"><span data-i18n="btn_save">저장하기</span></button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Existing Questions List -->
+            <div class="questions-manager-list" style="flex: 1; display: flex; flex-direction: column;">
+              <h4><span data-i18n="admin_list_title">등록된 문제 목록</span> (<span id="admin-questions-count">0</span>)</h4>
+              <div id="admin-questions-list" class="admin-questions-scroll">
+                <!-- Rendered via JS -->
+              </div>
             </div>
           </div>
         </div>

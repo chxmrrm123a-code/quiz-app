@@ -43,6 +43,10 @@ const translations = {
     modal_detail_title: "답안 상세 내역",
     nav_prev: "이전 문제",
     nav_next: "다음 문제",
+    btn_hide_questions: "숨기기",
+    lobby_exposure_prevented: "문제 노출 방지 모드 활성화됨",
+    lobby_exposure_desc: "스크린 노출을 방지하기 위해 시험지가 숨겨졌습니다.",
+    btn_show_questions: "문제 편집기 열기",
     btn_close: "닫기",
     stats_correct_rate: "정답률",
     stats_correct_rate_empty: "정답률: - (제출 없음)",
@@ -170,6 +174,10 @@ const translations = {
     modal_detail_title: "Chi tiết bài làm",
     nav_prev: "Câu trước",
     nav_next: "Câu sau",
+    btn_hide_questions: "Ẩn đi",
+    lobby_exposure_prevented: "Chế độ bảo mật câu hỏi",
+    lobby_exposure_desc: "Bộ đề đã được ẩn để chiếu màn hình.",
+    btn_show_questions: "Mở trình chỉnh sửa",
     btn_close: "Đóng",
     stats_correct_rate: "Tỉ lệ đúng",
     stats_correct_rate_empty: "Tỉ lệ đúng: - (Chưa nộp)",
@@ -297,6 +305,10 @@ const translations = {
     modal_detail_title: "Detailed Answers",
     nav_prev: "Previous",
     nav_next: "Next",
+    btn_hide_questions: "Hide",
+    lobby_exposure_prevented: "Question Security Active",
+    lobby_exposure_desc: "Questions hidden to prevent classroom exposure.",
+    btn_show_questions: "Open Question Editor",
     btn_close: "Close",
     stats_correct_rate: "Correct Rate",
     stats_correct_rate_empty: "Correct Rate: - (No submissions)",
@@ -434,6 +446,11 @@ function initElements() {
   el.waitInfoBox = document.getElementById('wait-info-box');
   el.waitInfoText = document.getElementById('wait-info-text');
   el.statHardestQ = document.getElementById('admin-hardest-q');
+  
+  el.btnCollapseQuestions = document.getElementById('btn-collapse-questions');
+  el.btnToggleQuestionsShow = document.getElementById('btn-toggle-questions-show');
+  el.adminQuestionsPlaceholder = document.getElementById('admin-questions-placeholder');
+  el.adminQuestionsContent = document.getElementById('admin-questions-content');
   
   // Forms
   el.joinForm = document.getElementById('join-form');
@@ -618,7 +635,22 @@ function setupEventListeners() {
         updateQuizSliderView();
       }
     });
+    // Admin Collapsible Question Editor Toggle
+  if (el.btnToggleQuestionsShow) {
+    el.btnToggleQuestionsShow.addEventListener('click', () => {
+      el.adminQuestionsPlaceholder.classList.add('hidden');
+      el.adminQuestionsContent.classList.remove('hidden');
+      el.btnCollapseQuestions.classList.remove('hidden');
+    });
   }
+  if (el.btnCollapseQuestions) {
+    el.btnCollapseQuestions.addEventListener('click', () => {
+      el.adminQuestionsPlaceholder.classList.remove('hidden');
+      el.adminQuestionsContent.classList.add('hidden');
+      el.btnCollapseQuestions.classList.add('hidden');
+    });
+  }
+}
 }
 
 // ==========================================================================
@@ -715,6 +747,12 @@ function switchTab(tab) {
     stopQuizTimer();
     stopExamStateCheck();
     showView('view-admin');
+    
+    // Collapse editor panel by default to prevent leaking questions on projector screen
+    if (el.adminQuestionsPlaceholder) el.adminQuestionsPlaceholder.classList.remove('hidden');
+    if (el.adminQuestionsContent) el.adminQuestionsContent.classList.add('hidden');
+    if (el.btnCollapseQuestions) el.btnCollapseQuestions.classList.add('hidden');
+
     if (el.displayRoomCode) {
       el.displayRoomCode.textContent = state.roomCode;
     }
