@@ -761,19 +761,23 @@ function stopCheatingDetection() {
 function handleVisibilityChange() {
   if (document.visibilityState === 'hidden') {
     state.tabSwitches++;
-    // Send to server in real-time
-    fetch(`${API_BASE}/api/tabswitch`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        nickname: state.nickname,
-        roomCode: state.roomCode,
-        tabSwitches: state.tabSwitches
-      })
-    }).catch(err => console.error("Error reporting tab switch:", err));
-    
+    reportProgress();
     alert(t('alert_cheating_warning'));
   }
+}
+
+function reportProgress() {
+  if (!state.nickname || !state.roomCode) return;
+  fetch(`${API_BASE}/api/progress`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      nickname: state.nickname,
+      roomCode: state.roomCode,
+      currentQuestionIdx: state.currentQuestionIdx,
+      tabSwitches: state.tabSwitches
+    })
+  }).catch(err => console.error("Error reporting progress:", err));
 }
 
 // ==========================================================================
@@ -1567,6 +1571,9 @@ function updateQuizSliderView() {
     if (el.btnNextQ) el.btnNextQ.classList.remove('hidden');
     if (el.quizSubmitContainer) el.quizSubmitContainer.classList.add('hidden');
   }
+
+  // Report index to server
+  reportProgress();
 }
 
 // 2. Render Admin Questions List
@@ -1779,9 +1786,17 @@ function renderLeaderboards() {
     if (switches > 3) switchClass = 'switch-warn-red';
     else if (switches > 0) switchClass = 'switch-warn-orange';
 
+    const qIndex = p.currentQuestionIdx !== undefined ? p.currentQuestionIdx : 0;
+    const totalQ = p.totalCount || state.questions.length || 1;
+    const progressLabel = state.currentLang === 'ko' 
+      ? `진행 중 (Q${qIndex + 1}/${totalQ})` 
+      : (state.currentLang === 'vi' 
+        ? `Đang thi (Q${qIndex + 1}/${totalQ})` 
+        : `In Progress (Q${qIndex + 1}/${totalQ})`);
+
     const statusBadge = isCompleted 
       ? `<span class="status-badge status-completed">${t('state_completed')}</span>`
-      : `<span class="status-badge status-pending" style="background: rgba(99, 102, 241, 0.1); color: var(--primary); padding: 0.2rem 0.5rem; border-radius: var(--radius-sm); font-size: 0.75rem; border: 1px solid rgba(99, 102, 241, 0.2); font-weight: 600;">${state.currentLang === 'ko' ? '진행 중' : (state.currentLang === 'vi' ? 'Đang thi' : 'In Progress')}</span>`;
+      : `<span class="status-badge status-pending" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b; padding: 0.2rem 0.5rem; border-radius: var(--radius-sm); font-size: 0.75rem; border: 1px solid rgba(245, 158, 11, 0.2); font-weight: 600;">${progressLabel}</span>`;
 
     const scoreText = isCompleted
       ? `<span style="font-weight: 700;">${p.score}%</span> (${Number(p.correctCount).toString()}/${p.totalCount})`

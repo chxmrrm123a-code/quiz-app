@@ -301,6 +301,37 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
             self.send_json_response(200, {"success": True, "tabSwitches": tab_switches})
             return
 
+        # Record live student progress (Student)
+        elif path == '/api/progress':
+            nickname = body.get('nickname', '').strip()
+            room_code = str(body.get('roomCode', '')).strip()
+            current_q_idx = int(body.get('currentQuestionIdx', 0))
+            tab_switches = int(body.get('tabSwitches', 0))
+
+            if not nickname or not room_code:
+                self.send_error_response(400, "Nickname and roomCode are required")
+                return
+
+            db = read_db()
+            rooms = db.get("rooms", {})
+            if room_code not in rooms:
+                self.send_error_response(404, "Room not found")
+                return
+
+            participants = rooms[room_code].get("participants", [])
+            user_idx = next((i for i, p in enumerate(participants) if p["nickname"].lower() == nickname.lower()), -1)
+            
+            if user_idx == -1:
+                self.send_error_response(404, "Participant not found")
+                return
+
+            db["rooms"][room_code]["participants"][user_idx]["currentQuestionIdx"] = current_q_idx
+            db["rooms"][room_code]["participants"][user_idx]["tabSwitches"] = tab_switches
+            write_db(db)
+
+            self.send_json_response(200, {"success": True, "currentQuestionIdx": current_q_idx, "tabSwitches": tab_switches})
+            return
+
         # Join as participant (Student)
         elif path == '/api/join':
             nickname = body.get('nickname', '').strip()
@@ -334,7 +365,8 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
                 "submittedAt": None,
                 "answers": {},
                 "grades": {},
-                "tabSwitches": 0
+                "tabSwitches": 0,
+                "currentQuestionIdx": 0
             }
             db["rooms"][room_code]["participants"].append(new_participant)
             write_db(db)
