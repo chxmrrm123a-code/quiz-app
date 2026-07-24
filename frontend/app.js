@@ -414,67 +414,6 @@ const translations = {
     alert_cheating_warning: "⚠️ Warning: Leaving the screen during the exam will be recorded as cheating!",
     toggle_exam_text_start: "Start Exam",
     toggle_exam_text_locked: "Lock Exam"
-  }iple Choice",
-    q_type_sa: "Short Answer",
-    q_type_mcq_short: "MCQ",
-    q_type_sa_short: "Short Answer",
-    q_image_label: "Question Image (Optional)",
-    q_image_preview_alt: "Image Preview",
-    q_options_label: "Multiple Choice Options (4 or 5 Choices)",
-    q_correct_label: "Correct Answer",
-    q_correct_placeholder: "Enter the correct answer (must match the option text exactly for multiple-choice)",
-    btn_cancel: "Cancel",
-    btn_save: "Save Question",
-    btn_edit: "Edit",
-    btn_delete: "Delete",
-    btn_export: "Export",
-    btn_import: "Import",
-    btn_clear: "Clear",
-    admin_list_title: "Registered Questions List",
-    q_preview_correct: "Correct Answer",
-    admin_stats_title: "Live Results & Statistics",
-    admin_reset_btn: "Reset All Quiz Data",
-    stat_players_label: "Total Players",
-    stat_avg_label: "Average Score",
-    live_status_title: "Live Standings & Rankings",
-    qr_access_title: "Mobile Quick Access",
-    qr_access_desc: "Scan with your phone camera on the same Wi-Fi network to enter immediately.",
-    cheats_col: "Tab Switches",
-    
-    // Dynamic Previews
-    q_preview_empty_title: "No questions registered.",
-    q_preview_empty_desc: "Please wait until the admin creates questions.",
-    admin_list_empty: "No questions found. Click 'Add New Question' to start.",
-    leaderboard_empty: "No participants have completed the quiz yet.",
-    short_answer_placeholder_text: "Enter your answer.",
-    
-    // Alerts/Prompts
-    alert_pin_success: "Teacher authenticated successfully!",
-    alert_pin_fail: "Invalid PIN code.",
-    alert_room_empty: "Please enter a Room Code.",
-    alert_room_invalid: "Room Code must be 4 digits.",
-    alert_room_not_found: "Room not found.",
-    alert_room_created: "New quiz room created! Room Code: {code}",
-    alert_import_success: "Questions imported successfully!",
-    alert_import_fail: "Invalid file format or import failed.",
-    alert_join_empty: "Please enter a nickname.",
-    alert_join_fail: "Failed to join.",
-    alert_server_error: "Failed to connect to server. Please verify the server is running.",
-    alert_profile_missing: "Participant profile missing. Please log in again.",
-    alert_unanswered: "You have {count} unanswered questions. Submit anyway?",
-    alert_submit_fail: "Failed to submit answers.",
-    alert_submit_error: "Error occurred during submission.",
-    alert_mcq_options_empty: "Please fill out at least 4 multiple-choice options (5th option is optional).",
-    alert_question_save_error: "Error occurred while saving question.",
-    alert_question_delete_confirm: "Are you sure you want to delete this question?",
-    alert_question_delete_fail: "Failed to delete question.",
-    alert_reset_confirm: "WARNING: All participant scores and records will be wiped out. Continue?",
-    alert_reset_success: "All quiz results reset successfully.",
-    alert_reset_fail: "Failed to reset.",
-    alert_image_size: "Image size is too large (max 2MB). Please select a smaller image.",
-    alert_cheating_warning: "⚠️ Warning: Leaving the screen during the exam will be recorded as cheating!",
-    toggle_exam_text_start: "Start Exam",
-    toggle_exam_text_locked: "Lock Exam"
   }
 };
 
@@ -493,7 +432,7 @@ let state = {
   pollingInterval: null,
   editingQuestionId: null, // null if adding new
   currentQuestionImage: null, // Base64 string of the selected image
-  currentLang: localStorage.getItem('quiz_lang') || 'en',
+  currentLang: localStorage.getItem('quiz_lang') || 'ko',
   adminToken: sessionStorage.getItem('admin_token') || null, // PIN string if authenticated
   examState: 'locked', // 'locked' | 'active'
   tabSwitches: 0,
