@@ -124,10 +124,14 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
         self.send_response(204)
         self.end_headers()
 
+    def is_valid_admin_pin(self, pin_to_check):
+        raw_pins = os.environ.get('ADMIN_PIN', '1234')
+        allowed_pins = [p.strip() for p in raw_pins.replace(',', ';').split(';')]
+        return pin_to_check in allowed_pins
+
     def check_admin_auth(self):
         auth_pin = self.headers.get('X-Admin-PIN', '')
-        correct_pin = os.environ.get('ADMIN_PIN', '1234')
-        if auth_pin != correct_pin:
+        if not self.is_valid_admin_pin(auth_pin):
             self.send_error_response(401, "인증 실패: 잘못된 PIN 번호입니다.")
             return False
         return True
@@ -202,8 +206,7 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
                 return
 
             auth_pin = self.headers.get('X-Admin-PIN', '')
-            correct_pin = os.environ.get('ADMIN_PIN', '1234')
-            is_admin = (auth_pin == correct_pin)
+            is_admin = self.is_valid_admin_pin(auth_pin)
 
             participants = room.get("participants", [])
             
@@ -279,8 +282,7 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
         # Check Admin credentials
         if path == '/api/admin/auth':
             pin = body.get('pin', '').strip()
-            correct_pin = os.environ.get('ADMIN_PIN', '1234')
-            if pin == correct_pin:
+            if self.is_valid_admin_pin(pin):
                 self.send_json_response(200, {"success": True, "token": "admin-authorized"})
             else:
                 self.send_error_response(401, "잘못된 PIN 번호입니다.")
