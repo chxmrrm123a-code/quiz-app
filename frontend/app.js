@@ -128,10 +128,17 @@ const translations = {
     alert_reset_confirm: "경고: 모든 참가자의 기록과 채점 점수가 초기화됩니다. 계속하시겠습니까?",
     alert_reset_success: "모든 응시 결과가 성공적으로 초기화되었습니다.",
     alert_reset_fail: "초기화에 실패했습니다.",
-    alert_image_size: "이미지 용량이 너무 큽니다 (최대 2MB). 더 작은 이미지를 사용해 주세요.",
+    alert_image_size: "이미지 용량이 너무 큽니다 (최대 15MB). 더 작은 이미지를 사용해 주세요.",
     alert_cheating_warning: "⚠️ 경고: 시험 중에 화면을 벗어나면 부정행위로 간주되어 기록에 남습니다!",
     toggle_exam_text_start: "시험 시작",
-    toggle_exam_text_locked: "시험지 잠금"
+    toggle_exam_text_locked: "시험지 잠금",
+    multi_select_badge: "☑️ 복수 선택 가능 (부분점수 적용)",
+    multi_select_badge_no_partial: "☑️ 복수 선택 (모두 맞춰야 정답)",
+    q_is_multiple_label: "복수정답 (다중 선택)",
+    q_allow_partial_label: "부분점수 허용",
+    opt_correct_label: "정답",
+    badge_multi: "복수정답",
+    badge_partial: "부분점수"
   },
   vi: {
     logo_sub: "Trực tiếp",
@@ -207,10 +214,9 @@ const translations = {
     q_type_mcq_short: "Trắc nghiệm",
     q_type_sa_short: "Tự luận",
     q_image_label: "Hình ảnh câu hỏi (Tùy chọn)",
-    q_image_preview_alt: "Xem trước hình ảnh",
     q_options_label: "Cấu hình lựa chọn (4 hoặc 5 lựa chọn)",
     q_correct_label: "Đáp án đúng",
-    q_correct_placeholder: "Nhập đáp án đúng (Với trắc nghiệm phải khớp chính xác với văn bản lựa chọn)",
+    q_correct_placeholder: "Nhập đáp án đúng",
     btn_cancel: "Hủy bỏ",
     btn_save: "Lưu lại",
     btn_edit: "Sửa",
@@ -259,10 +265,17 @@ const translations = {
     alert_reset_confirm: "CẢNH BÁO: Tất cả kết quả thi của thí sinh sẽ bị xóa sạch. Bạn có muốn tiếp tục?",
     alert_reset_success: "Đã đặt lại toàn bộ kết quả thi thành công.",
     alert_reset_fail: "Đặt lại thất bại.",
-    alert_image_size: "Dung lượng ảnh quá lớn (Tối đa 2MB). Vui lòng chọn ảnh nhỏ hơn.",
+    alert_image_size: "Dung lượng ảnh quá lớn (Tối đa 15MB). Vui lòng chọn ảnh nhỏ hơn.",
     alert_cheating_warning: "⚠️ Cảnh báo: Rời khỏi màn hình khi đang làm bài sẽ bị tính là vi phạm!",
     toggle_exam_text_start: "Bắt đầu thi",
-    toggle_exam_text_locked: "Khóa đề thi"
+    toggle_exam_text_locked: "Khóa đề thi",
+    multi_select_badge: "☑️ Chọn nhiều đáp án (Có điểm thành phần)",
+    multi_select_badge_no_partial: "☑️ Chọn nhiều đáp án (Cần đúng tất cả)",
+    q_is_multiple_label: "Nhiều đáp án đúng",
+    q_allow_partial_label: "Cho phép điểm thành phần",
+    opt_correct_label: "Đáp án",
+    badge_multi: "Nhiều đáp án",
+    badge_partial: "Điểm thành phần"
   },
   en: {
     logo_sub: "Live",
@@ -310,6 +323,13 @@ const translations = {
     lobby_exposure_desc: "Questions hidden to prevent classroom exposure.",
     btn_show_questions: "Open Question Editor",
     btn_close: "Close",
+    multi_select_badge: "☑️ Multiple Selection (Partial Credit)",
+    multi_select_badge_no_partial: "☑️ Multiple Selection (All Must Match)",
+    q_is_multiple_label: "Multiple Correct Answers",
+    q_allow_partial_label: "Allow Partial Credit",
+    opt_correct_label: "Correct",
+    badge_multi: "Multi-Answer",
+    badge_partial: "Partial Credit",
     stats_correct_rate: "Correct Rate",
     stats_correct_rate_empty: "Correct Rate: - (No submissions)",
     stats_correct_rate_format: "Correct Rate: {rate}% ({correct}/{total} correct)",
@@ -324,7 +344,7 @@ const translations = {
     admin_pin_label: "PIN Code (Default: 1234)",
     admin_pin_placeholder: "Enter PIN code",
     admin_login_btn: "Authenticate",
- 
+
     // Admin Dashboard
     admin_title: "Create & Edit Questions",
     admin_new_btn: "Add New Question",
@@ -334,6 +354,67 @@ const translations = {
     q_text_placeholder: "Enter the question",
     q_type_label: "Question Type",
     q_type_mcq: "Multiple Choice",
+    q_type_sa: "Short Answer",
+    q_type_mcq_short: "MCQ",
+    q_type_sa_short: "Short Answer",
+    q_image_label: "Question Image (Optional)",
+    q_image_preview_alt: "Image Preview",
+    q_options_label: "Multiple Choice Options (4 or 5 Choices)",
+    q_correct_label: "Correct Answer",
+    q_correct_placeholder: "Enter the correct answer (must match option text or index 1, 3)",
+    btn_cancel: "Cancel",
+    btn_save: "Save Question",
+    btn_edit: "Edit",
+    btn_delete: "Delete",
+    btn_export: "Export",
+    btn_import: "Import",
+    btn_clear: "Clear",
+    admin_list_title: "Registered Questions List",
+    q_preview_correct: "Correct Answer",
+    admin_stats_title: "Live Results & Statistics",
+    admin_reset_btn: "Reset All Quiz Data",
+    stat_players_label: "Total Players",
+    stat_avg_label: "Average Score",
+    live_status_title: "Live Standings & Rankings",
+    qr_access_title: "Mobile Quick Access",
+    qr_access_desc: "Scan with your phone camera on the same Wi-Fi network to enter immediately.",
+    cheats_col: "Tab Switches",
+    
+    // Dynamic Previews
+    q_preview_empty_title: "No questions registered.",
+    q_preview_empty_desc: "Please wait until the admin creates questions.",
+    admin_list_empty: "No questions found. Click 'Add New Question' to start.",
+    leaderboard_empty: "No participants have completed the quiz yet.",
+    short_answer_placeholder_text: "Enter your answer.",
+    
+    // Alerts/Prompts
+    alert_pin_success: "Teacher authenticated successfully!",
+    alert_pin_fail: "Invalid PIN code.",
+    alert_room_empty: "Please enter a Room Code.",
+    alert_room_invalid: "Room Code must be 4 digits.",
+    alert_room_not_found: "Room not found.",
+    alert_room_created: "New quiz room created! Room Code: {code}",
+    alert_import_success: "Questions imported successfully!",
+    alert_import_fail: "Invalid file format or import failed.",
+    alert_join_empty: "Please enter a nickname.",
+    alert_join_fail: "Failed to join.",
+    alert_server_error: "Failed to connect to server. Please verify the server is running.",
+    alert_profile_missing: "Participant profile missing. Please log in again.",
+    alert_unanswered: "You have {count} unanswered questions. Submit anyway?",
+    alert_submit_fail: "Failed to submit answers.",
+    alert_submit_error: "Error occurred during submission.",
+    alert_mcq_options_empty: "Please fill out at least 4 multiple-choice options (5th option is optional).",
+    alert_question_save_error: "Error occurred while saving question.",
+    alert_question_delete_confirm: "Are you sure you want to delete this question?",
+    alert_question_delete_fail: "Failed to delete question.",
+    alert_reset_confirm: "WARNING: All participant scores and records will be wiped out. Continue?",
+    alert_reset_success: "All quiz results reset successfully.",
+    alert_reset_fail: "Failed to reset.",
+    alert_image_size: "Image size is too large (max 15MB). Please select a smaller image.",
+    alert_cheating_warning: "⚠️ Warning: Leaving the screen during the exam will be recorded as cheating!",
+    toggle_exam_text_start: "Start Exam",
+    toggle_exam_text_locked: "Lock Exam"
+  }iple Choice",
     q_type_sa: "Short Answer",
     q_type_mcq_short: "MCQ",
     q_type_sa_short: "Short Answer",
@@ -511,6 +592,8 @@ function initElements() {
   el.qType = document.getElementById('q-type');
   el.mcqOptionsContainer = document.getElementById('mcq-options-container');
   el.qCorrect = document.getElementById('q-correct');
+  el.qIsMultiple = document.getElementById('q-is-multiple');
+  el.qAllowPartial = document.getElementById('q-allow-partial');
   el.adminQuestionsList = document.getElementById('admin-questions-list');
   el.adminQuestionsCount = document.getElementById('admin-questions-count');
   el.adminLeaderboardBody = document.getElementById('admin-leaderboard-body');
@@ -598,6 +681,28 @@ function setupEventListeners() {
       if (opt4) opt4.value = '';
     });
   }
+
+  // Option correctness checkboxes sync with qCorrect and qIsMultiple
+  document.querySelectorAll('.opt-correct-chk').forEach(chk => {
+    chk.addEventListener('change', () => {
+      const checkedIdxs = Array.from(document.querySelectorAll('.opt-correct-chk'))
+        .filter(c => c.checked)
+        .map(c => parseInt(c.dataset.optIdx));
+
+      if (checkedIdxs.length > 1) {
+        if (el.qIsMultiple) el.qIsMultiple.checked = true;
+      }
+
+      const answers = checkedIdxs.map(idx => {
+        const inputVal = document.getElementById(`opt-${idx}`)?.value.trim();
+        return inputVal || (idx + 1).toString();
+      });
+
+      if (el.qCorrect && answers.length > 0) {
+        el.qCorrect.value = answers.join(', ');
+      }
+    });
+  });
 
   // Lock / Unlock Exam State
   el.btnToggleExam.addEventListener('click', handleToggleExamState);
@@ -1001,7 +1106,7 @@ function handleImageSelect(e) {
   const file = e.target.files[0];
   if (!file) return;
 
-  if (file.size > 2 * 1024 * 1024) {
+  if (file.size > 15 * 1024 * 1024) {
     alert(t('alert_image_size'));
     el.qImageFile.value = '';
     return;
@@ -1009,9 +1114,36 @@ function handleImageSelect(e) {
 
   const reader = new FileReader();
   reader.onload = (event) => {
-    state.currentQuestionImage = event.target.result;
-    el.qImagePreview.src = state.currentQuestionImage;
-    el.qImagePreviewContainer.classList.remove('hidden');
+    const img = new Image();
+    img.onload = () => {
+      const maxDim = 1200;
+      let width = img.width;
+      let height = img.height;
+
+      if (width > maxDim || height > maxDim) {
+        if (width > height) {
+          height = Math.round((height * maxDim) / width);
+          width = maxDim;
+        } else {
+          width = Math.round((width * maxDim) / height);
+          height = maxDim;
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        state.currentQuestionImage = canvas.toDataURL('image/jpeg', 0.82);
+      } else {
+        state.currentQuestionImage = event.target.result;
+      }
+
+      el.qImagePreview.src = state.currentQuestionImage;
+      el.qImagePreviewContainer.classList.remove('hidden');
+    };
+    img.src = event.target.result;
   };
   reader.readAsDataURL(file);
 }
@@ -1356,22 +1488,35 @@ async function handleQuestionSubmit(e) {
       options.push(opt5);
     }
 
-    // Resolve index input (1-5 or A-E) to the actual option text
-    const valLower = correctAnswer.toLowerCase();
-    let optIdx = -1;
-    if (correctAnswer.match(/^[1-5]$/)) {
-      optIdx = parseInt(correctAnswer) - 1;
-    } else if (valLower.match(/^[a-e]$/)) {
-      optIdx = valLower.charCodeAt(0) - 97;
-    }
+    // Resolve index input (1-5 or A-E or comma-separated shortcuts 1, 3) to actual option text
+    const tokens = correctAnswer.split(/[,;]+/).map(s => s.trim()).filter(Boolean);
+    const resolvedTokens = tokens.map(tok => {
+      const tokLower = tok.toLowerCase();
+      let optIdx = -1;
+      if (tok.match(/^[1-5]$/)) {
+        optIdx = parseInt(tok) - 1;
+      } else if (tokLower.match(/^[a-e]$/)) {
+        optIdx = tokLower.charCodeAt(0) - 97;
+      }
+      if (optIdx >= 0 && optIdx < options.length) {
+        return options[optIdx];
+      }
+      return tok;
+    });
 
-    if (optIdx >= 0 && optIdx < options.length) {
-      correctAnswer = options[optIdx];
+    if (resolvedTokens.length > 0) {
+      correctAnswer = resolvedTokens.join(', ');
       el.qCorrect.value = correctAnswer; // Update UI for visual confirmation
     }
   }
 
-  const payload = { roomCode: state.roomCode, type, questionText, correctAnswer, options, imageUrl: state.currentQuestionImage };
+  let isMultiple = el.qIsMultiple ? el.qIsMultiple.checked : false;
+  if (type === 'multiple-choice' && (correctAnswer.includes(',') || correctAnswer.includes(';'))) {
+    isMultiple = true;
+  }
+  const allowPartial = el.qAllowPartial ? el.qAllowPartial.checked : true;
+
+  const payload = { roomCode: state.roomCode, type, questionText, correctAnswer, options, imageUrl: state.currentQuestionImage, isMultiple, allowPartial };
   const method = state.editingQuestionId ? 'PUT' : 'POST';
   
   // Pass roomCode inside query parameter for PUT updates
@@ -1605,6 +1750,21 @@ function renderStudentQuiz() {
 
     // Options or Subjective Input
     if (q.type === 'multiple-choice') {
+      const isMulti = q.isMultiple || (q.correctAnswer && String(q.correctAnswer).includes(','));
+
+      if (isMulti) {
+        const hintBadge = document.createElement('div');
+        hintBadge.style.fontSize = '0.78rem';
+        hintBadge.style.fontWeight = 'bold';
+        hintBadge.style.color = 'var(--primary)';
+        hintBadge.style.marginBottom = '0.6rem';
+        hintBadge.style.display = 'flex';
+        hintBadge.style.alignItems = 'center';
+        hintBadge.style.gap = '0.3rem';
+        hintBadge.innerHTML = `<i data-lucide="check-square" style="width: 14px; height: 14px;"></i> ${q.allowPartial !== false ? t('multi_select_badge') : t('multi_select_badge_no_partial')}`;
+        qCard.appendChild(hintBadge);
+      }
+
       const optionsGrid = document.createElement('div');
       optionsGrid.className = 'options-grid';
 
@@ -1612,13 +1772,24 @@ function renderStudentQuiz() {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'option-btn';
-        if (state.answers[q.id] === opt) {
+
+        let currentAnsList = [];
+        if (state.answers[q.id]) {
+          if (Array.isArray(state.answers[q.id])) {
+            currentAnsList = state.answers[q.id];
+          } else {
+            currentAnsList = String(state.answers[q.id]).split(',').map(s => s.trim()).filter(Boolean);
+          }
+        }
+
+        const isSelected = currentAnsList.some(item => item.toLowerCase() === opt.toLowerCase());
+        if (isSelected) {
           btn.classList.add('selected');
         }
 
         const marker = document.createElement('span');
         marker.className = 'option-marker';
-        marker.textContent = String.fromCharCode(65 + optIdx); // A, B, C, D, E
+        marker.textContent = isMulti ? (isSelected ? '✓' : String.fromCharCode(65 + optIdx)) : String.fromCharCode(65 + optIdx);
         
         const label = document.createElement('span');
         label.textContent = opt;
@@ -1627,10 +1798,38 @@ function renderStudentQuiz() {
         btn.appendChild(label);
 
         btn.addEventListener('click', () => {
-          const siblings = optionsGrid.querySelectorAll('.option-btn');
-          siblings.forEach(s => s.classList.remove('selected'));
-          btn.classList.add('selected');
-          state.answers[q.id] = opt;
+          if (isMulti) {
+            let selectedList = [];
+            if (state.answers[q.id]) {
+              if (Array.isArray(state.answers[q.id])) {
+                selectedList = [...state.answers[q.id]];
+              } else {
+                selectedList = String(state.answers[q.id]).split(',').map(s => s.trim()).filter(Boolean);
+              }
+            }
+
+            const existsIdx = selectedList.findIndex(item => item.toLowerCase() === opt.toLowerCase());
+            if (existsIdx !== -1) {
+              selectedList.splice(existsIdx, 1);
+              btn.classList.remove('selected');
+              marker.textContent = String.fromCharCode(65 + optIdx);
+            } else {
+              selectedList.push(opt);
+              btn.classList.add('selected');
+              marker.textContent = '✓';
+            }
+
+            if (selectedList.length > 0) {
+              state.answers[q.id] = selectedList.join(', ');
+            } else {
+              delete state.answers[q.id];
+            }
+          } else {
+            const siblings = optionsGrid.querySelectorAll('.option-btn');
+            siblings.forEach(s => s.classList.remove('selected'));
+            btn.classList.add('selected');
+            state.answers[q.id] = opt;
+          }
           updateProgressBar();
         });
 
@@ -1787,7 +1986,11 @@ function renderAdminQuestions() {
     
     const badge = document.createElement('span');
     badge.className = `q-type-badge ${q.type === 'multiple-choice' ? 'type-mcq' : 'type-sa'}`;
-    badge.textContent = q.type === 'multiple-choice' ? t('q_type_mcq_short') : t('q_type_sa_short');
+    let badgeText = q.type === 'multiple-choice' ? t('q_type_mcq_short') : t('q_type_sa_short');
+    if (q.isMultiple || (q.correctAnswer && String(q.correctAnswer).includes(','))) {
+      badgeText += ` (${t('badge_multi')})`;
+    }
+    badge.textContent = badgeText;
 
     meta.appendChild(num);
     meta.appendChild(badge);
@@ -2270,17 +2473,30 @@ function showQuestionForm(titleKey = 'admin_form_new', q = null) {
       handleImageRemove();
     }
 
+    if (el.qIsMultiple) el.qIsMultiple.checked = q.isMultiple || (q.correctAnswer && String(q.correctAnswer).includes(','));
+    if (el.qAllowPartial) el.qAllowPartial.checked = q.allowPartial !== false;
+
     if (q.type === 'multiple-choice') {
       el.mcqOptionsContainer.classList.remove('hidden');
       toggleMcqOptionsRequired(true);
+      const corrTokens = String(q.correctAnswer).split(/[,;]+/).map(s => s.trim().toLowerCase());
+      
       q.options.forEach((opt, idx) => {
         const optInput = document.getElementById(`opt-${idx}`);
         if (optInput) optInput.value = opt;
+        
+        const chk = document.querySelector(`.opt-correct-chk[data-opt-idx="${idx}"]`);
+        if (chk) {
+          const optLower = opt.toLowerCase();
+          chk.checked = corrTokens.includes(optLower) || corrTokens.includes((idx + 1).toString()) || corrTokens.includes(String.fromCharCode(97 + idx));
+        }
       });
       // If editing a 4-choice question, ensure Option 5 input is cleared
       if (q.options.length < 5) {
         const opt4 = document.getElementById('opt-4');
         if (opt4) opt4.value = '';
+        const chk4 = document.querySelector('.opt-correct-chk[data-opt-idx="4"]');
+        if (chk4) chk4.checked = false;
       }
     } else {
       el.mcqOptionsContainer.classList.add('hidden');
@@ -2293,6 +2509,8 @@ function showQuestionForm(titleKey = 'admin_form_new', q = null) {
     el.qText.value = '';
     el.qType.value = 'multiple-choice';
     el.qCorrect.value = '';
+    if (el.qIsMultiple) el.qIsMultiple.checked = false;
+    if (el.qAllowPartial) el.qAllowPartial.checked = true;
     handleImageRemove();
     
     el.mcqOptionsContainer.classList.remove('hidden');
@@ -2317,6 +2535,8 @@ function clearMcqOptionFields() {
   for (let i = 0; i < 5; i++) {
     const elOpt = document.getElementById(`opt-${i}`);
     if (elOpt) elOpt.value = '';
+    const chk = document.querySelector(`.opt-correct-chk[data-opt-idx="${i}"]`);
+    if (chk) chk.checked = false;
   }
 }
 

@@ -361,25 +361,51 @@
                   <div class="option-input-row">
                     <span class="opt-num">1</span>
                     <input type="text" id="opt-0" placeholder="A" required>
+                    <label class="opt-correct-label" style="display: flex; align-items: center; gap: 0.25rem; font-size: 0.8rem; cursor: pointer; color: var(--text-muted); padding: 0 0.3rem;">
+                      <input type="checkbox" class="opt-correct-chk" data-opt-idx="0"> <span data-i18n="opt_correct_label">정답</span>
+                    </label>
                   </div>
                   <div class="option-input-row">
                     <span class="opt-num">2</span>
                     <input type="text" id="opt-1" placeholder="B" required>
+                    <label class="opt-correct-label" style="display: flex; align-items: center; gap: 0.25rem; font-size: 0.8rem; cursor: pointer; color: var(--text-muted); padding: 0 0.3rem;">
+                      <input type="checkbox" class="opt-correct-chk" data-opt-idx="1"> <span data-i18n="opt_correct_label">정답</span>
+                    </label>
                   </div>
                   <div class="option-input-row">
                     <span class="opt-num">3</span>
                     <input type="text" id="opt-2" placeholder="C" required>
+                    <label class="opt-correct-label" style="display: flex; align-items: center; gap: 0.25rem; font-size: 0.8rem; cursor: pointer; color: var(--text-muted); padding: 0 0.3rem;">
+                      <input type="checkbox" class="opt-correct-chk" data-opt-idx="2"> <span data-i18n="opt_correct_label">정답</span>
+                    </label>
                   </div>
                   <div class="option-input-row">
                     <span class="opt-num">4</span>
                     <input type="text" id="opt-3" placeholder="D" required>
+                    <label class="opt-correct-label" style="display: flex; align-items: center; gap: 0.25rem; font-size: 0.8rem; cursor: pointer; color: var(--text-muted); padding: 0 0.3rem;">
+                      <input type="checkbox" class="opt-correct-chk" data-opt-idx="3"> <span data-i18n="opt_correct_label">정답</span>
+                    </label>
                   </div>
                   <div class="option-input-row" style="display: flex; gap: 0.5rem; align-items: center;">
                     <span class="opt-num">5</span>
                     <input type="text" id="opt-4" placeholder="E" style="flex: 1;">
+                    <label class="opt-correct-label" style="display: flex; align-items: center; gap: 0.25rem; font-size: 0.8rem; cursor: pointer; color: var(--text-muted); padding: 0 0.3rem;">
+                      <input type="checkbox" class="opt-correct-chk" data-opt-idx="4"> <span data-i18n="opt_correct_label">정답</span>
+                    </label>
                     <button type="button" id="btn-clear-opt5" class="btn btn-secondary btn-sm" style="padding: 0 0.8rem; height: 38px; display: flex; align-items: center; justify-content: center; gap: 0.3rem;" title="5번 보기 비우기">
                       <i data-lucide="x-circle" style="width: 16px; height: 16px;"></i> <span data-i18n="btn_clear">비우기</span>
                     </button>
+                  </div>
+
+                  <div style="display: flex; gap: 1.2rem; margin-top: 0.8rem; flex-wrap: wrap; padding: 0.5rem 0.7rem; background: rgba(255, 255, 255, 0.03); border-radius: var(--radius-sm); border: 1px dashed var(--border-color);">
+                    <label style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.82rem; cursor: pointer; color: var(--text-light); font-weight: bold;">
+                      <input type="checkbox" id="q-is-multiple">
+                      <span data-i18n="q_is_multiple_label">복수정답 (다중 선택)</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.82rem; cursor: pointer; color: var(--text-light); font-weight: bold;">
+                      <input type="checkbox" id="q-allow-partial" checked>
+                      <span data-i18n="q_allow_partial_label">부분점수 허용</span>
+                    </label>
                   </div>
                 </div>
 

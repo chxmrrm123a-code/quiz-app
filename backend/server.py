@@ -474,14 +474,50 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
 
             for q in questions:
                 q_id = q["id"]
-                user_ans = str(answers.get(q_id, "")).strip().lower()
-                # Split synonyms by comma or semicolon
-                corr_ans_list = [ans.strip().lower() for ans in str(q["correctAnswer"]).replace(";", ",").split(",")]
-                if user_ans in corr_ans_list:
-                    grades[q_id] = 1.0
-                    score_count += 1.0
+                raw_user_ans = answers.get(q_id, "")
+                
+                # Normalize user answers into list
+                if isinstance(raw_user_ans, list):
+                    user_ans_list = [str(a).strip().lower() for a in raw_user_ans if str(a).strip()]
                 else:
-                    grades[q_id] = 0.0
+                    user_ans_list = [a.strip().lower() for a in str(raw_user_ans).replace(";", ",").split(",") if a.strip()]
+
+                # Normalize correct answers into list
+                raw_corr_ans = str(q.get("correctAnswer", ""))
+                corr_ans_list = [a.strip().lower() for a in raw_corr_ans.replace(";", ",").split(",") if a.strip()]
+
+                q_type = q.get("type", "multiple-choice")
+                is_multiple = q.get("isMultiple", len(corr_ans_list) > 1)
+                allow_partial = q.get("allowPartial", True)
+
+                if q_type == "multiple-choice" or q_type == "multiple-select":
+                    if is_multiple or len(corr_ans_list) > 1:
+                        user_set = set(user_ans_list)
+                        corr_set = set(corr_ans_list)
+                        
+                        if user_set == corr_set:
+                            grade_val = 1.0
+                        elif allow_partial and len(corr_set) > 0:
+                            correct_selected = user_set.intersection(corr_set)
+                            wrong_selected = user_set - corr_set
+                            net_score = len(correct_selected) - len(wrong_selected)
+                            grade_val = max(0.0, round(net_score / len(corr_set), 2))
+                        else:
+                            grade_val = 0.0
+                    else:
+                        if user_ans_list and user_ans_list[0] in corr_ans_list:
+                            grade_val = 1.0
+                        else:
+                            grade_val = 0.0
+                else:
+                    # Short answer (주관식)
+                    if any(ans in corr_ans_list for ans in user_ans_list):
+                        grade_val = 1.0
+                    else:
+                        grade_val = 0.0
+
+                grades[q_id] = grade_val
+                score_count += grade_val
 
             percentage_score = round((score_count / total_count) * 100) if total_count > 0 else 0
 
@@ -514,6 +550,8 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
             q_correct = body.get('correctAnswer')
             q_options = body.get('options', [])
             q_image = body.get('imageUrl', None)
+            q_is_multiple = bool(body.get('isMultiple', False))
+            q_allow_partial = bool(body.get('allowPartial', True))
 
             if not room_code or not q_type or not q_text or q_correct is None:
                 self.send_error_response(400, "Missing required fields")
@@ -530,7 +568,9 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
                 "questionText": q_text,
                 "options": q_options if q_type == "multiple-choice" else [],
                 "correctAnswer": str(q_correct).strip(),
-                "imageUrl": q_image
+                "imageUrl": q_image,
+                "isMultiple": q_is_multiple,
+                "allowPartial": q_allow_partial
             }
             db["rooms"][room_code]["questions"].append(new_question)
             write_db(db)
@@ -727,6 +767,8 @@ class QuizRequestHandler(http.server.BaseHTTPRequestHandler):
             questions[q_idx]["type"] = body.get("type", questions[q_idx]["type"])
             questions[q_idx]["correctAnswer"] = str(body.get("correctAnswer", questions[q_idx]["correctAnswer"])).strip()
             questions[q_idx]["imageUrl"] = body.get("imageUrl", questions[q_idx].get("imageUrl", None))
+            questions[q_idx]["isMultiple"] = bool(body.get("isMultiple", questions[q_idx].get("isMultiple", False)))
+            questions[q_idx]["allowPartial"] = bool(body.get("allowPartial", questions[q_idx].get("allowPartial", True)))
             
             if questions[q_idx]["type"] == "multiple-choice":
                 questions[q_idx]["options"] = body.get("options", questions[q_idx].get("options", []))
